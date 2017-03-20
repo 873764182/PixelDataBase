@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="pixel.database.app.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/buttom_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onViewClick"
+            android:text="插入" />
+
+        <Button
+            android:id="@+id/buttom_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onViewClick"
+            android:text="读取" />
+
+        <Button
+            android:id="@+id/buttom_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onViewClick"
+            android:text="更新" />
+
+        <Button
+            android:id="@+id/buttom_4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onViewClick"
+            android:text="删除" />
+    </LinearLayout>
+
+</ScrollView>
