@@ -14,6 +14,6 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
-        PDB.initDataBase(this, "pdb.db", 1, UserTable.class);
+        PDB.initDataBase(this, "pdb.db", 1, UserTable.class);   // 初始化数据库与创建数据库表
     }
 }

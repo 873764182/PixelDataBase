@@ -19,16 +19,20 @@ public class MainActivity extends Activity {
     }
 
     public void onViewClick(View view) {
+        // 插入
         if (view.getId() == R.id.buttom_1) {
             PDB.insert(new UserTable("测试", 100));
         }
+        // 查询
         if (view.getId() == R.id.buttom_2) {
             List<Object> objects = PDB.query(UserTable.class, null, null);
             ((Button) view).setText(objects.toString());
         }
+        // 更新
         if (view.getId() == R.id.buttom_3) {
             PDB.update(new UserTable("运行", 200), "1", "_id");
         }
+        // 删除
         if (view.getId() == R.id.buttom_4) {
             PDB.delete(UserTable.class, "3", "_id");
         }
