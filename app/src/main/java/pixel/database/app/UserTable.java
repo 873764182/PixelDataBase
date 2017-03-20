@@ -7,7 +7,7 @@ import pixel.database.library.OnDataBaseIdInterface;
  */
 
 public class UserTable implements OnDataBaseIdInterface {
-    public Long _id;
+    public Long _id;    // _id是支持库的特殊字段
     public String name;
     public Integer age;
 
