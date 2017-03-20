@@ -24,7 +24,6 @@ public class MainActivity extends Activity {
         }
         if (view.getId() == R.id.buttom_2) {
             List<Object> objects = PDB.query(UserTable.class, null, null);
-            Toast.makeText(this, "总条数: " + objects.size() + "\n" + objects.toString(), Toast.LENGTH_LONG).show();
             ((Button) view).setText(objects.toString());
         }
         if (view.getId() == R.id.buttom_3) {
