@@ -40,7 +40,7 @@ public class PixelDao {
 
     public synchronized static SQLiteDatabase getSQLiteDatabase() {
         if (mSqLiteOpenHelper == null) {
-            throw new NumberFormatException("请先调用 initDataBase() 初始化数据库");
+            throw new NullPointerException("请先调用 initDataBase() 初始化数据库");
         }
         if (mSqLiteDatabase == null) {
             mSqLiteDatabase = mSqLiteOpenHelper.getWritableDatabase();
