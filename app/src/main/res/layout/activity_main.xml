@@ -17,26 +17,69 @@
             android:onClick="onViewClick"
             android:text="插入" />
 
-        <Button
-            android:id="@+id/buttom_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="onViewClick"
-            android:text="读取" />
 
-        <Button
-            android:id="@+id/buttom_3"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="onViewClick"
-            android:text="更新" />
+            android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/buttom_4"
+            <EditText
+                android:id="@+id/editTextQueryId"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:hint="_id"
+                android:inputType="number" />
+
+            <Button
+                android:id="@+id/buttom_2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onViewClick"
+                android:text="读取" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="onViewClick"
-            android:text="删除" />
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/editTextUpdateId"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:hint="_id"
+                android:inputType="number" />
+
+            <Button
+                android:id="@+id/buttom_3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onViewClick"
+                android:text="更新" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/editTextDeleteId"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:hint="_id" />
+
+            <Button
+                android:id="@+id/buttom_4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:onClick="onViewClick"
+                android:text="删除" />
+        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

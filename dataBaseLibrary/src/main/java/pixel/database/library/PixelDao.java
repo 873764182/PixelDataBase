@@ -15,14 +15,26 @@ import java.util.List;
  * SQLite支持的数据类型: NULL(空)、INTEGER(整数)、REAL（浮点数字）、TEXT(字符串文本)和BLOB(二进制对象)
  */
 
-public class PDB {
-    private static SQLiteOpenHelper mSqLiteOpenHelper = null;
-    private static SQLiteDatabase mSqLiteDatabase = null;
+public class PixelDao {
+    protected volatile static SQLiteOpenHelper mSqLiteOpenHelper = null;
+    protected volatile static SQLiteDatabase mSqLiteDatabase = null;
 
-    public synchronized static void initDataBase(Context context, String name, int version, Class<?>... tables) {
+    public static void initDataBase(Context context, String name, int version, Class<?>... tables) {
+        initDataBase(context, name, version, null, tables);
+    }
+
+    public synchronized static void initDataBase(Context context, String name, int version, OnDbUpdateCallback onDbUpdateCallback, Class<?>... tables) {
         mSqLiteOpenHelper = new DataBaseHelper(context, name, version);
         for (Class<?> cls : tables) {
-            createTable(getSQLiteDatabase(), getTableName(cls), getColumnInfo(cls));
+            createTable(getTableName(cls), getColumnInfo(cls));
+        }
+        // 检测版本
+        int localVersion = ConfigUtil.getInt(context, "ver_" + name);
+        if (localVersion < version) {
+            if (onDbUpdateCallback != null) {
+                onDbUpdateCallback.onUpgrade(getSQLiteDatabase(), localVersion, version);
+            }
+            ConfigUtil.saveInt(context, "ver_" + name, version);
         }
     }
 
@@ -37,7 +49,7 @@ public class PDB {
     }
 
     private static String getTableName(Class<?> cls) {
-        return cls.getName().replace(".", "_");
+        return cls.getName().replace(".", "_"); // 数据库表名为对象全路径
     }
 
     private static List<ColumnInfo> getColumnInfo(Class<?> cls) {
@@ -46,7 +58,8 @@ public class PDB {
         if (fields != null && fields.length > 0) {
             for (Field field : fields) {
                 // CREATE TABLE IF NOT EXISTS pixel_database_app_UserTable ( _id INTEGER PRIMARY KEY AUTOINCREMENT, age TEXT, name TEXT, $change TEXT, serialVersionUID TEXT )
-                if (field.getName().contains("$change") || field.getName().contains("serialVersionUID") || "_id".equalsIgnoreCase(field.getName())) {
+                if (field.getName().contains("$change") || field.getName().contains("serialVersionUID")
+                        || field.getName().startsWith("_")) {   // 所有下划线开头的属性都不实例化到数据库
                     continue;
                 }
                 field.setAccessible(true); // field.isAccessible() 过滤私有的属性
@@ -56,7 +69,17 @@ public class PDB {
         return columnInfos;
     }
 
-    private static void createTable(SQLiteDatabase sqLiteDatabase, String tableName, List<ColumnInfo> columnInfos) {
+    private static void execSQL(String sql, Object[] params) {
+        try {
+            getSQLiteDatabase().beginTransaction();
+            getSQLiteDatabase().execSQL(sql, params);
+            getSQLiteDatabase().setTransactionSuccessful();
+        } finally {
+            getSQLiteDatabase().endTransaction();
+        }
+    }
+
+    public static void createTable(String tableName, List<ColumnInfo> columnInfos) {
         StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
         sql.append(tableName).append(" ( _id INTEGER PRIMARY KEY AUTOINCREMENT, ");
         for (ColumnInfo info : columnInfos) {
@@ -64,10 +87,12 @@ public class PDB {
         }
         sql.append(" ) ");
         String sqlStr = sql.toString().replace("  ", " ").replace(", )", " )");  // 去掉多余字符
-        sqLiteDatabase.execSQL(sqlStr);
+        getSQLiteDatabase().execSQL(sqlStr);
     }
 
-    // ============================================================================================= 增删查改
+    public static void deleteTable(String tableName) {
+        getSQLiteDatabase().execSQL("DROP TABLE " + tableName);
+    }
 
     public static void insert(Object object) {
         StringBuilder sql = new StringBuilder("INSERT INTO ");
@@ -96,52 +121,66 @@ public class PDB {
         }
         sql.append(" ) ");
         String sqlStr = sql.toString().replace("  ", " ");
-        try {
-            getSQLiteDatabase().beginTransaction();
-            getSQLiteDatabase().execSQL(sqlStr, params);
-            getSQLiteDatabase().setTransactionSuccessful();
-        } finally {
-            getSQLiteDatabase().endTransaction();
-        }
+        execSQL(sqlStr, params);
     }
 
     public static void delete(Class<?> cls) {
-        delete(cls, null, null);
+        delete(cls, (Object) null, null);
     }
 
     public static void delete(Class<?> cls, Object key, String column) {
+        delete(cls, key != null ? new Object[]{key} : null, column != null ? new String[]{column} : null);
+    }
+
+    public static void delete(Class<?> cls, Object[] keys, String[] columns) {
         StringBuilder sql = new StringBuilder("DELETE FROM ");
         sql.append(getTableName(cls));
         String[] params = null;
-        if (key != null || column != null) {
-            sql.append(" WHERE ");
-            sql.append(column).append(" = ").append("?");
-
-            params = new String[]{key.toString()};
+        if (keys != null && columns != null) {
+            params = new String[columns.length];
+            if (keys.length != columns.length) {
+                throw new NullPointerException("参数与数据库列长度不一致");
+            }
+            sql.append(" WHERE ( ");
+            for (int i = 0; i < columns.length; i++) {
+                sql.append(columns[i]).append(" = ").append(" ? ");
+                if (i != columns.length - 1) {
+                    sql.append(" AND ");
+                }
+                params[i] = keys[i].toString();
+            }
+            sql.append(" ) ");
         }
         String sqlStr = sql.toString().replace("  ", " ");
-        try {
-            getSQLiteDatabase().beginTransaction();
-            getSQLiteDatabase().execSQL(sqlStr, params);
-            getSQLiteDatabase().setTransactionSuccessful();
-        } finally {
-            getSQLiteDatabase().endTransaction();
-        }
+        execSQL(sqlStr, params);
     }
 
     public static List<Object> query(Class<?> cls) {
-        return query(cls, null, null);
+        return query(cls, (Object) null, null);
     }
 
     public static List<Object> query(Class<?> cls, Object key, String column) {
+        return query(cls, key != null ? new Object[]{key} : null, column != null ? new String[]{column} : null);
+    }
+
+    public static List<Object> query(Class<?> cls, Object[] keys, String[] columns) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ");
         sql.append(getTableName(cls));
         String[] params = null;
-        if (key != null || column != null) {
-            sql.append(" WHERE ");
-            sql.append(column).append(" = ").append("?");
-
-            params = new String[]{key.toString()};
+        if (keys != null && columns != null) {
+            params = new String[columns.length];
+            if (keys.length != columns.length) {
+                throw new NullPointerException("参数与数据库列长度不一致");
+            }
+            sql.append(" WHERE ( ");
+            for (int i = 0; i < columns.length; i++) {
+                sql.append(columns[i]).append(" = ").append(" ? ");
+                if (i != columns.length - 1) {
+                    sql.append(" AND ");
+                }
+                params[i] = keys[i].toString();
+            }
+            sql.append(" ) ");
         }
         String sqlStr = sql.toString().replace("  ", " ");
         Cursor cursor = getSQLiteDatabase().rawQuery(sqlStr, params);
@@ -166,8 +205,8 @@ public class PDB {
                     } else {
                         info.field.set(object, cursor.getString(cursor.getColumnIndex(info.columnName)));
                     }
-                    if (object instanceof OnDataBaseIdInterface) {
-                        ((OnDataBaseIdInterface) object).setId(cursor.getLong(cursor.getColumnIndex("_id")));
+                    if (object instanceof OnDbIdCallback) {
+                        ((OnDbIdCallback) object).setId(cursor.getLong(cursor.getColumnIndex("_id")));
                     }
                     objects.add(object);
                 }
@@ -181,11 +220,18 @@ public class PDB {
     }
 
     public static void update(Object object, Object key, String column) {
+        update(object, new Object[]{key}, new String[]{column});
+    }
+
+    public static void update(Object object, Object[] keys, String[] columns) {
+        if (keys == null || columns == null) {
+            throw new NullPointerException("更新的参数与数据库列不能为空");
+        }
         StringBuilder sql = new StringBuilder("UPDATE ");
         sql.append(getTableName(object.getClass()));
         sql.append(" SET ");
         List<ColumnInfo> columnInfos = getColumnInfo(object.getClass());
-        Object[] params = new Object[columnInfos.size() + 1];
+        Object[] params = new Object[columnInfos.size() + columns.length];
 
         for (int i = 0; i < columnInfos.size(); i++) {
             sql.append(columnInfos.get(i).columnName).append(" = ? ");
@@ -196,23 +242,22 @@ public class PDB {
             try {
                 params[i] = columnInfos.get(i).field.get(object);   // 获取参数
             } catch (IllegalAccessException e) {
+                e.printStackTrace();
                 params[i] = "";
             }
         }
-        sql.append(" WHERE ");
-        sql.append(column);
-        sql.append(" = ? ");
-        String sqlStr = sql.toString().replace("  ", " ");
+        sql.append(" WHERE ( ");
+        for (int i = 0; i < columns.length; i++) {
+            sql.append(columns[i]).append(" = ? ");
+            if (i != columns.length - 1) {
+                sql.append(" AND ");
+            }
 
-        params[columnInfos.size()] = key;
-
-        try {
-            getSQLiteDatabase().beginTransaction();
-            getSQLiteDatabase().execSQL(sqlStr, params);
-            getSQLiteDatabase().setTransactionSuccessful();
-        } finally {
-            getSQLiteDatabase().endTransaction();
+            params[columnInfos.size() + i] = keys[i];
         }
+        sql.append(" ) ");
+        String sqlStr = sql.toString().replace("  ", " ");
+        execSQL(sqlStr, params);
     }
 
 }
