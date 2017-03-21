@@ -3,7 +3,8 @@
 ## 导入依赖jar包
 ##### pixel-db.jar 
 ## 初始化
-######  // UserTable 是需要映射到SQLite里的一个普通实体,可以同时传入多个,每一个都会被映射成一个数据库表,所有非下划线开头的属性会被映射为表的一列
+######  UserTable 是需要映射到SQLite里的一个普通实体,可以同时传入多个.
+######  每一个都会被映射成一个数据库表,所有非下划线开头的属性会被映射为表的一列.
 ######  PixelDao.initDataBase(getApplicationContext(), "pdb.db", 1, UserTable.class);
 ##### 如果需要监听数据库版本变更,可以传入一个监听器.
 ###### PixelDao.initDataBase(this, "pdb.db", 2, new OnDbUpdateCallback() {
@@ -17,5 +18,5 @@
 ###### List<Object> objects = PixelDao.query(UserTable.class, _id, "_id"); // 查询 (条件: 数据库"_id"列要等于_id变量的值)
 ###### PixelDao.update(new UserTable("运行", 200), _id, "_id");  // 更新 (条件: 数据库"_id"列要等于_id变量的值)
 ###### PixelDao.delete(UserTable.class, _id, "_id"); // 删除 (条件: 数据库"_id"列要等于_id变量的值)
-## 获取 数据库对象
+## 获取数据库对象
 ###### SQLiteDatabase database = PixelDao.getSQLiteDatabase();
