@@ -29,12 +29,12 @@ public class PixelDao {
             createTable(getTableName(cls), getColumnInfo(cls));
         }
         // 检测版本
-        int localVersion = ConfigUtil.getInt(context, "ver_" + name);
+        int localVersion = ConfigUtil.getInt(context, "v_" + name);
         if (localVersion < version) {
             if (onDbUpdateCallback != null) {
                 onDbUpdateCallback.onUpgrade(getSQLiteDatabase(), localVersion, version);
             }
-            ConfigUtil.saveInt(context, "ver_" + name, version);
+            ConfigUtil.saveInt(context, "v_" + name, version);
         }
     }
 
