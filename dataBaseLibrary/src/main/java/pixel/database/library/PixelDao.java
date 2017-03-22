@@ -15,28 +15,48 @@ import java.util.List;
  * SQLite支持的数据类型: NULL(空)、INTEGER(整数)、REAL（浮点数字）、TEXT(字符串文本)和BLOB(二进制对象)
  */
 
-public class PixelDao {
-    protected volatile static SQLiteOpenHelper mSqLiteOpenHelper = null;
-    protected volatile static SQLiteDatabase mSqLiteDatabase = null;
+public abstract class PixelDao {
+    private volatile static SQLiteOpenHelper mSqLiteOpenHelper = null;
+    private volatile static SQLiteDatabase mSqLiteDatabase = null;
 
-    public static void initDataBase(Context context, String name, int version, Class<?>... tables) {
-        initDataBase(context, name, version, null, tables);
+    /**
+     * 初始化数据库且根据实体创建数据库表
+     *
+     * @param context 上下文
+     * @param dbName  数据库名称
+     * @param version 数据库版本
+     * @param tables  表实体
+     */
+    public static void initDataBase(Context context, String dbName, int version, Class<?>... tables) {
+        initDataBase(context, dbName, version, null, tables);
     }
 
-    public synchronized static void initDataBase(Context context, String name, int version, OnDbUpdateCallback onDbUpdateCallback, Class<?>... tables) {
-        mSqLiteOpenHelper = new DataBaseHelper(context, name, version);
+    /**
+     * @param context            上下文
+     * @param dbName             数据库名称
+     * @param version            数据库版本
+     * @param onDbUpdateCallback 数据库版本更新监听
+     * @param tables             表实体
+     */
+    public synchronized static void initDataBase(Context context, String dbName, int version, OnDbUpdateCallback onDbUpdateCallback, Class<?>... tables) {
+        mSqLiteOpenHelper = new DataBaseHelper(context, dbName, version);
         // 建表
         createTable(tables);
         // 检测版本
-        int localVersion = ConfigUtil.getInt(context, "v_" + name);
+        int localVersion = ConfigUtil.getInt(context, "v_" + dbName);
         if (localVersion < version) {
             if (onDbUpdateCallback != null) {
                 onDbUpdateCallback.onUpgrade(getSQLiteDatabase(), localVersion, version, tables);
             }
-            ConfigUtil.saveInt(context, "v_" + name, version);
+            ConfigUtil.saveInt(context, "v_" + dbName, version);
         }
     }
 
+    /**
+     * 获取数据库实例
+     *
+     * @return SQLiteDatabase
+     */
     public synchronized static SQLiteDatabase getSQLiteDatabase() {
         if (mSqLiteOpenHelper == null) {
             throw new NullPointerException("请先调用 initDataBase() 初始化数据库");
@@ -47,10 +67,22 @@ public class PixelDao {
         return mSqLiteDatabase;
     }
 
+    /**
+     * 根据实体获取数据库对应的表名
+     *
+     * @param cls Java实体
+     * @return 数据库表名
+     */
     public static String getTableName(Class<?> cls) {
         return cls.getName().replace(".", "_"); // 数据库表名为对象全路径
     }
 
+    /**
+     * 获取Java实体属性信息
+     *
+     * @param cls Java实体
+     * @return 属性描述信息
+     */
     public static List<ColumnInfo> getColumnInfo(Class<?> cls) {
         List<ColumnInfo> columnInfos = new ArrayList<>();
         Field[] fields = cls.getDeclaredFields();
@@ -68,6 +100,12 @@ public class PixelDao {
         return columnInfos;
     }
 
+    /**
+     * 直接执行SQL语句到数据库
+     *
+     * @param sql    SQL语句
+     * @param params 参数集合
+     */
     public static void execSQL(String sql, Object[] params) {
         try {
             getSQLiteDatabase().beginTransaction();
@@ -78,12 +116,23 @@ public class PixelDao {
         }
     }
 
+    /**
+     * 根据Java创建数据库表
+     *
+     * @param tables Java实体
+     */
     public static void createTable(Class<?>... tables) {
         for (Class<?> cls : tables) {
             createTable(getTableName(cls), getColumnInfo(cls));
         }
     }
 
+    /**
+     * 根据表名与实体属性描述信息创建数据库表
+     *
+     * @param tableName   数据库表名
+     * @param columnInfos Java实体属性描述信息
+     */
     public static void createTable(String tableName, List<ColumnInfo> columnInfos) {
         StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
         sql.append(tableName).append(" ( _id INTEGER PRIMARY KEY AUTOINCREMENT, ");
@@ -95,10 +144,22 @@ public class PixelDao {
         getSQLiteDatabase().execSQL(sqlStr);
     }
 
-    public static void deleteTable(Class<?> cls) {
-        getSQLiteDatabase().execSQL("DROP TABLE " + getTableName(cls));
+    /**
+     * 删除数据库表
+     *
+     * @param clss Java实体
+     */
+    public static void deleteTable(Class<?>... clss) {
+        for (Class<?> cls : clss) {
+            getSQLiteDatabase().execSQL("DROP TABLE " + getTableName(cls));
+        }
     }
 
+    /**
+     * 插入一行数据
+     *
+     * @param object 数据实体
+     */
     public static void insert(Object object) {
         StringBuilder sql = new StringBuilder("INSERT INTO ");
         sql.append(getTableName(object.getClass())).append(" ( ");
@@ -129,18 +190,45 @@ public class PixelDao {
         execSQL(sqlStr, params);
     }
 
+    /**
+     * 删除表数据
+     *
+     * @param cls Java实体
+     */
     public static void delete(Class<?> cls) {
         delete(cls, (Object) null, null);
     }
 
+    /**
+     * 删除表数据
+     *
+     * @param cls    Java实体
+     * @param key    参数值
+     * @param column 数据库列名
+     */
     public static void delete(Class<?> cls, Object key, String column) {
         delete(cls, key != null ? new Object[]{key} : null, column != null ? new String[]{column} : null);
     }
 
+    /**
+     * 删除表数据
+     *
+     * @param cls     Java实体
+     * @param keys    参数值集合
+     * @param columns 数据库列名集合
+     */
     public static void delete(Class<?> cls, Object[] keys, String[] columns) {
         delete(cls, keys, columns, false);
     }
 
+    /**
+     * 删除表数据
+     *
+     * @param cls     Java实体
+     * @param keys    参数值集合
+     * @param columns 数据库列名集合
+     * @param or      是否是 或
+     */
     public static void delete(Class<?> cls, Object[] keys, String[] columns, boolean or) {
         StringBuilder sql = new StringBuilder("DELETE FROM ");
         sql.append(getTableName(cls));
@@ -148,7 +236,7 @@ public class PixelDao {
         if (keys != null && columns != null) {
             params = new String[columns.length];
             if (keys.length != columns.length) {
-                throw new NullPointerException("参数与数据库列长度不一致");
+                throw new IllegalArgumentException("参数与数据库列长度不一致");
             }
             sql.append(" WHERE ( ");
             for (int i = 0; i < columns.length; i++) {
@@ -168,18 +256,49 @@ public class PixelDao {
         execSQL(sqlStr, params);
     }
 
+    /**
+     * 查询表数据
+     *
+     * @param cls Java实体
+     * @return 表数据
+     */
     public static List<Object> query(Class<?> cls) {
         return query(cls, (Object) null, null);
     }
 
+    /**
+     * 查询表数据
+     *
+     * @param cls    Java实体
+     * @param key    参数值
+     * @param column 数据库列名
+     * @return 表数据
+     */
     public static List<Object> query(Class<?> cls, Object key, String column) {
         return query(cls, key != null ? new Object[]{key} : null, column != null ? new String[]{column} : null);
     }
 
+    /**
+     * 查询表数据
+     *
+     * @param cls     Java实体
+     * @param keys    参数值集合
+     * @param columns 数据库列名集合
+     * @return 表数据
+     */
     public static List<Object> query(Class<?> cls, Object[] keys, String[] columns) {
         return query(cls, keys, columns, false);
     }
 
+    /**
+     * 查询表数据
+     *
+     * @param cls     Java实体
+     * @param keys    参数值集合
+     * @param columns 数据库列名集合
+     * @param or      是否是 或
+     * @return 表数据
+     */
     public static List<Object> query(Class<?> cls, Object[] keys, String[] columns, boolean or) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ");
         sql.append(getTableName(cls));
@@ -187,7 +306,7 @@ public class PixelDao {
         if (keys != null && columns != null) {
             params = new String[columns.length];
             if (keys.length != columns.length) {
-                throw new NullPointerException("参数与数据库列长度不一致");
+                throw new IllegalArgumentException("参数与数据库列长度不一致");
             }
             sql.append(" WHERE ( ");
             for (int i = 0; i < columns.length; i++) {
@@ -208,6 +327,13 @@ public class PixelDao {
         return cursorToList(cls, cursor);
     }
 
+    /**
+     * 数据库数据集与Java实体数据转化
+     *
+     * @param cls    Java实体
+     * @param cursor 数据库数据集
+     * @return Java数据实体
+     */
     public static List<Object> cursorToList(Class<?> cls, Cursor cursor) {
         List<Object> objects = new ArrayList<>();
         try {
@@ -240,17 +366,39 @@ public class PixelDao {
         return objects;
     }
 
+    /**
+     * 更新表数据
+     *
+     * @param object Java数据实体
+     * @param key    参数值
+     * @param column 数据库列名
+     */
     public static void update(Object object, Object key, String column) {
         update(object, new Object[]{key}, new String[]{column});
     }
 
+    /**
+     * 更新表数据
+     *
+     * @param object  Java数据实体
+     * @param keys    参数值集合
+     * @param columns 数据库列名集合
+     */
     public static void update(Object object, Object[] keys, String[] columns) {
         update(object, keys, columns, false);
     }
 
+    /**
+     * 更新表数据
+     *
+     * @param object  Java数据实体
+     * @param keys    参数值集合
+     * @param columns 数据库列名集合
+     * @param or      是否是 或
+     */
     public static void update(Object object, Object[] keys, String[] columns, boolean or) {
         if (keys == null || columns == null) {
-            throw new NullPointerException("更新的参数与数据库列不能为空");
+            throw new IllegalArgumentException("更新的参数与数据库列不能为空");
         }
         StringBuilder sql = new StringBuilder("UPDATE ");
         sql.append(getTableName(object.getClass()));
