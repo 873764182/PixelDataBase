@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 /**
  * Created by panxi on 2016/4/22.
  */
-public class ConfigUtil {
+public abstract class ConfigUtil {
     private static final String NAME = ConfigUtil.class.getName();
     private static SharedPreferences preferences = null;
     private static SharedPreferences.Editor editor = null;
