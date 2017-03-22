@@ -12,7 +12,7 @@
 ###### PixelDao.initDataBase(this, "pdb.db", 2, new OnDbUpdateCallback() {
 ######            @Override
 ######            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-######                Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);
+######                &nbsp;&nbsp;Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);
 ######            }
 ######        }, UserTable.class);
 ## 增删查改操作
