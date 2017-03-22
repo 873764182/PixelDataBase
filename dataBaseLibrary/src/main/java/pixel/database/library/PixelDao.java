@@ -355,8 +355,8 @@ public abstract class PixelDao {
                     if (object instanceof OnDbIdCallback) {
                         ((OnDbIdCallback) object).setId(cursor.getLong(cursor.getColumnIndex("_id")));
                     }
-                    objects.add(object);
                 }
+                objects.add(object);
             }
         } catch (Exception e) {
             e.printStackTrace();
