@@ -17,9 +17,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
-        PixelDao.initDataBase(getApplicationContext(), "pdb.db", 1, UserTable.class);
-
-        PixelDao.initDataBase(this, "pdb.db", 2, new OnDbUpdateCallback() {
+        PixelDao.initDataBase(this, "pdb.db", 4, new OnDbUpdateCallback() {
             @Override
             public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion, Class<?>[] tables) {
                 Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);
