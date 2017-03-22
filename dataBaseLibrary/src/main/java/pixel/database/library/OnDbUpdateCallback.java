@@ -7,5 +7,5 @@ import android.database.sqlite.SQLiteDatabase;
  */
 
 public interface OnDbUpdateCallback {
-    void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
+    void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion, Class<?>... tables);
 }

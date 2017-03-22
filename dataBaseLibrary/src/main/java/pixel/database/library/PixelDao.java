@@ -25,14 +25,13 @@ public class PixelDao {
 
     public synchronized static void initDataBase(Context context, String name, int version, OnDbUpdateCallback onDbUpdateCallback, Class<?>... tables) {
         mSqLiteOpenHelper = new DataBaseHelper(context, name, version);
-        for (Class<?> cls : tables) {
-            createTable(getTableName(cls), getColumnInfo(cls));
-        }
+        // 建表
+        createTable(tables);
         // 检测版本
         int localVersion = ConfigUtil.getInt(context, "v_" + name);
         if (localVersion < version) {
             if (onDbUpdateCallback != null) {
-                onDbUpdateCallback.onUpgrade(getSQLiteDatabase(), localVersion, version);
+                onDbUpdateCallback.onUpgrade(getSQLiteDatabase(), localVersion, version, tables);
             }
             ConfigUtil.saveInt(context, "v_" + name, version);
         }
@@ -48,11 +47,11 @@ public class PixelDao {
         return mSqLiteDatabase;
     }
 
-    private static String getTableName(Class<?> cls) {
+    public static String getTableName(Class<?> cls) {
         return cls.getName().replace(".", "_"); // 数据库表名为对象全路径
     }
 
-    private static List<ColumnInfo> getColumnInfo(Class<?> cls) {
+    public static List<ColumnInfo> getColumnInfo(Class<?> cls) {
         List<ColumnInfo> columnInfos = new ArrayList<>();
         Field[] fields = cls.getDeclaredFields();
         if (fields != null && fields.length > 0) {
@@ -69,13 +68,19 @@ public class PixelDao {
         return columnInfos;
     }
 
-    private static void execSQL(String sql, Object[] params) {
+    public static void execSQL(String sql, Object[] params) {
         try {
             getSQLiteDatabase().beginTransaction();
             getSQLiteDatabase().execSQL(sql, params);
             getSQLiteDatabase().setTransactionSuccessful();
         } finally {
             getSQLiteDatabase().endTransaction();
+        }
+    }
+
+    public static void createTable(Class<?>... tables) {
+        for (Class<?> cls : tables) {
+            createTable(getTableName(cls), getColumnInfo(cls));
         }
     }
 
@@ -90,8 +95,8 @@ public class PixelDao {
         getSQLiteDatabase().execSQL(sqlStr);
     }
 
-    public static void deleteTable(String tableName) {
-        getSQLiteDatabase().execSQL("DROP TABLE " + tableName);
+    public static void deleteTable(Class<?> cls) {
+        getSQLiteDatabase().execSQL("DROP TABLE " + getTableName(cls));
     }
 
     public static void insert(Object object) {
@@ -133,6 +138,10 @@ public class PixelDao {
     }
 
     public static void delete(Class<?> cls, Object[] keys, String[] columns) {
+        delete(cls, keys, columns, false);
+    }
+
+    public static void delete(Class<?> cls, Object[] keys, String[] columns, boolean or) {
         StringBuilder sql = new StringBuilder("DELETE FROM ");
         sql.append(getTableName(cls));
         String[] params = null;
@@ -145,7 +154,11 @@ public class PixelDao {
             for (int i = 0; i < columns.length; i++) {
                 sql.append(columns[i]).append(" = ").append(" ? ");
                 if (i != columns.length - 1) {
-                    sql.append(" AND ");
+                    if (or) {
+                        sql.append(" OR ");
+                    } else {
+                        sql.append(" AND ");
+                    }
                 }
                 params[i] = keys[i].toString();
             }
@@ -164,6 +177,10 @@ public class PixelDao {
     }
 
     public static List<Object> query(Class<?> cls, Object[] keys, String[] columns) {
+        return query(cls, keys, columns, false);
+    }
+
+    public static List<Object> query(Class<?> cls, Object[] keys, String[] columns, boolean or) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ");
         sql.append(getTableName(cls));
         String[] params = null;
@@ -176,7 +193,11 @@ public class PixelDao {
             for (int i = 0; i < columns.length; i++) {
                 sql.append(columns[i]).append(" = ").append(" ? ");
                 if (i != columns.length - 1) {
-                    sql.append(" AND ");
+                    if (or) {
+                        sql.append(" OR ");
+                    } else {
+                        sql.append(" AND ");
+                    }
                 }
                 params[i] = keys[i].toString();
             }
@@ -187,7 +208,7 @@ public class PixelDao {
         return cursorToList(cls, cursor);
     }
 
-    private static List<Object> cursorToList(Class<?> cls, Cursor cursor) {
+    public static List<Object> cursorToList(Class<?> cls, Cursor cursor) {
         List<Object> objects = new ArrayList<>();
         try {
             while (cursor.moveToNext()) {
@@ -224,6 +245,10 @@ public class PixelDao {
     }
 
     public static void update(Object object, Object[] keys, String[] columns) {
+        update(object, keys, columns, false);
+    }
+
+    public static void update(Object object, Object[] keys, String[] columns, boolean or) {
         if (keys == null || columns == null) {
             throw new NullPointerException("更新的参数与数据库列不能为空");
         }
@@ -250,7 +275,11 @@ public class PixelDao {
         for (int i = 0; i < columns.length; i++) {
             sql.append(columns[i]).append(" = ? ");
             if (i != columns.length - 1) {
-                sql.append(" AND ");
+                if (or) {
+                    sql.append(" OR ");
+                } else {
+                    sql.append(" AND ");
+                }
             }
 
             params[columnInfos.size() + i] = keys[i];

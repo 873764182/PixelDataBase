@@ -21,7 +21,7 @@ public class App extends Application {
 
         PixelDao.initDataBase(this, "pdb.db", 2, new OnDbUpdateCallback() {
             @Override
-            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion, Class<?>[] tables) {
                 Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);
             }
         }, UserTable.class);   // 初始化数据库与创建数据库表
