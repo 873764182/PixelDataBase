@@ -1,7 +1,7 @@
 # Android SQLite
 #### 简单的Android本地数据库支持库,目前已经实现根据普通Java对象自动生成数据库表,和生成与表对应的增删查改操作方法.
 ## 导入依赖jar包
-##### pixel-db.jar 
+##### pixel-data-base.jar 
 # 开始使用
 ## 初始化
 ######  // pdb.db 数据库名称
