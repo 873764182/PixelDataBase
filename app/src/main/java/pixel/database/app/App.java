@@ -4,6 +4,8 @@ import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.facebook.stetho.Stetho;
+
 import pixel.database.library.OnDbUpdateCallback;
 import pixel.database.library.PixelDao;
 
@@ -17,6 +19,8 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
+        Stetho.initializeWithDefaults(this);    // TODO 数据库调试 发布时去掉
+
         PixelDao.initDataBase(this, "pdb.db", 1, new OnDbUpdateCallback() {
             @Override
             public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion, Class<?>... tables) {
@@ -28,6 +32,6 @@ public class App extends Application {
                     PixelDao.createTable(tables);
                 }
             }
-        }, UserTable.class);   // 初始化数据库与创建数据库表
+        }, UserTable.class, MsgTable.class);   // 初始化数据库与创建数据库表
     }
 }

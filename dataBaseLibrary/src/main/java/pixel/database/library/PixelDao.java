@@ -137,7 +137,7 @@ public abstract class PixelDao {
         StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
         sql.append(tableName).append(" ( _id INTEGER PRIMARY KEY AUTOINCREMENT, ");
         for (ColumnInfo info : columnInfos) {
-            sql.append(info.columnName).append(" ").append("TEXT").append(", ");    // info.typeString
+            sql.append(info.columnName).append(" TEXT ").append(", ");    // info.typeString
         }
         sql.append(" ) ");
         String sqlStr = sql.toString().replace("  ", " ").replace(", )", " )");  // 去掉多余字符

@@ -27,4 +27,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     testCompile 'junit:junit:4.12'
     compile project(':dataBaseLibrary')
+
+    compile 'com.facebook.stetho:stetho:1.3.1'   // TODO Stetho核心 数据库调试 发布时可以去掉
 }
