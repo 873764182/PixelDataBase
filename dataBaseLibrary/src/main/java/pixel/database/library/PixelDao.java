@@ -16,8 +16,7 @@ import java.util.List;
  */
 
 public abstract class PixelDao {
-    private volatile static SQLiteOpenHelper mSqLiteOpenHelper = null;
-    private volatile static SQLiteDatabase mSqLiteDatabase = null;
+    private static SQLiteDatabase mSqLiteDatabase = null;
 
     /**
      * 初始化数据库且根据实体创建数据库表
@@ -39,16 +38,9 @@ public abstract class PixelDao {
      * @param tables             表实体
      */
     public synchronized static void initDataBase(Context context, String dbName, int version, OnDbUpdateCallback onDbUpdateCallback, Class<?>... tables) {
-        mSqLiteOpenHelper = new DataBaseHelper(context, dbName, version);
-        // 建表
-        createTable(tables);
-        // 检测版本
-        int localVersion = ConfigUtil.getInt(context, "v_" + dbName);
-        if (localVersion < version) {
-            if (onDbUpdateCallback != null) {
-                onDbUpdateCallback.onUpgrade(getSQLiteDatabase(), localVersion, version, tables);
-            }
-            ConfigUtil.saveInt(context, "v_" + dbName, version);
+        DataBaseHelper dataBaseHelper = new DataBaseHelper(context, dbName, version, onDbUpdateCallback, tables);
+        if (mSqLiteDatabase == null){
+            mSqLiteDatabase = dataBaseHelper.getWritableDatabase();
         }
     }
 
@@ -58,13 +50,11 @@ public abstract class PixelDao {
      * @return SQLiteDatabase
      */
     public synchronized static SQLiteDatabase getSQLiteDatabase() {
-        if (mSqLiteOpenHelper == null) {
-            throw new NullPointerException("请先调用 initDataBase() 初始化数据库");
-        }
-        if (mSqLiteDatabase == null) {
-            mSqLiteDatabase = mSqLiteOpenHelper.getWritableDatabase();
-        }
-        return mSqLiteDatabase;
+        return PixelDao.mSqLiteDatabase;
+    }
+
+    public static void setSqLiteDatabase(SQLiteDatabase mSqLiteDatabase) {
+        PixelDao.mSqLiteDatabase = mSqLiteDatabase;
     }
 
     /**
