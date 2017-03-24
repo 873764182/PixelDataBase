@@ -34,7 +34,7 @@ public class MainActivity extends Activity {
         // 查询
         if (view.getId() == R.id.buttom_2) {
             String _id = mEditTextQueryId.getText().toString();
-            List<Object> objects;
+            List<UserTable> objects;
             if (_id.length() <= 0) {
                 objects = PixelDao.query(UserTable.class);
             } else {
