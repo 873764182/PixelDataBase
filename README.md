@@ -4,7 +4,7 @@
 ##### 所有的操作方法都是静态的方法,依赖库是一个仅为9k大小的jar,代码污染率极低.
 ## 开始使用
 ### 1. 导入一个依赖jar包到你的项目的lib目录,加入你的项目编译环境.
-#### pixel-data-base.jar (在项目根目录)
+#### pixel-data-base.jar (在项目根目录可以找到)
 ### 2. 初始化
 ####  // 传入数据库 名称 与 需要生成表的 Java实体 对象列表.
 ######  PixelDao.initDataBase(getApplicationContext(), "pdb.db", 1, UserTable.class, MsgTable.class);
