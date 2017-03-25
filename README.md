@@ -19,7 +19,6 @@
 ###### PixelDao.insert(new UserTable("测试", 100));  // 插入
 ###### PixelDao.update(new UserTable("运行", 200), _id, "_id");  // 更新 (条件: 数据库"_id"列要等于_id变量的值)
 ###### PixelDao.delete(UserTable.class, _id, "_id"); // 删除 (条件: 数据库"_id"列要等于_id变量的值)
-
 ###### List<UserTable> userTables = PixelDao.query(UserTable.class); // 查询 (无条件,读取所有.)
 ###### List<UserTable> userTables = PixelDao.query(UserTable.class, _id, "_id"); // 查询 (有条件: 数据库"_id"列要等于_id变量的值)
 ###### List<UserTable> userTables = PixelDao.query(UserTable.class, _id, "_id", 20L, 0L); // 分页查询 (有条件: 数据库"_id"列要等于_id变量的值, 查询第0页, 每页20条.)
