@@ -21,7 +21,7 @@ public class App extends Application {
 
         Stetho.initializeWithDefaults(this);    // TODO 数据库调试 发布时去掉
 
-        PixelDao.initDataBase(this, "pdb.db", 2, new OnDbUpdateCallback() {
+        PixelDao.initDataBase(this, "pdb.db", 1, new OnDbUpdateCallback() {
             @Override
             public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion, Class<?>... tables) {
                 Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);

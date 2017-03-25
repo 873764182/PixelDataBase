@@ -83,7 +83,7 @@ public abstract class PixelDao {
                 if (fieldName.contains("$change") || fieldName.contains("serialVersionUID") || fieldName.startsWith("_")) {
                     continue;   // 过滤掉特殊字符 所有下划线开头的属性都不实例化到数据库
                 }
-                String fieldType = field.getType().toString();
+                String fieldType = field.getType().getName();
                 if (!fieldType.contains("int") && !fieldType.contains("Integer") &&
                         !fieldType.contains("long") && !fieldType.contains("Long") &&
                         !fieldType.contains("double") && !fieldType.contains("Double") &&
@@ -325,6 +325,7 @@ public abstract class PixelDao {
         execSQL(sqlStr, params);
     }
 
+
     /**
      * 查询表数据
      *
@@ -332,7 +333,19 @@ public abstract class PixelDao {
      * @return 表数据
      */
     public static <T extends Object> List<T> query(Class<T> cls) {
-        return query(cls, (Object) null, null);
+        return query(cls, (Object) null, null, null, null);
+    }
+
+    /**
+     * 查询表数据
+     *
+     * @param cls    Java实体
+     * @param number 页条数
+     * @param page   页数(从0开始)
+     * @return 表数据
+     */
+    public static <T extends Object> List<T> query(Class<T> cls, Long number, Long page) {
+        return query(cls, (Object) null, null, number, page);
     }
 
     /**
@@ -341,10 +354,12 @@ public abstract class PixelDao {
      * @param cls    Java实体
      * @param key    参数值
      * @param column 数据库列名
+     * @param number 页条数
+     * @param page   页数
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Object key, String column) {
-        return query(cls, key != null ? new Object[]{key} : null, column != null ? new String[]{column} : null);
+    public static <T extends Object> List<T> query(Class<T> cls, Object key, String column, Long number, Long page) {
+        return query(cls, key != null ? new Object[]{key} : null, column != null ? new String[]{column} : null, number, page);
     }
 
     /**
@@ -353,10 +368,12 @@ public abstract class PixelDao {
      * @param cls     Java实体
      * @param keys    参数值集合
      * @param columns 数据库列名集合
+     * @param number  页条数
+     * @param page    页数(从0开始)
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns) {
-        return query(cls, keys, columns, false);
+    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, Long number, Long page) {
+        return query(cls, keys, columns, number, page, false);
     }
 
     /**
@@ -365,10 +382,12 @@ public abstract class PixelDao {
      * @param cls     Java实体
      * @param keys    参数值集合
      * @param columns 数据库列名集合
+     * @param number  页条数
+     * @param page    页数(从0开始)
      * @param or      是否是 或
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, boolean or) {
+    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, Long number, Long page, boolean or) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ");
         sql.append(getTableName(cls));
         String[] params = null;
@@ -390,6 +409,9 @@ public abstract class PixelDao {
                 params[i] = keys[i].toString();
             }
             sql.append(" ) ");
+        }
+        if (number != null && number >= 0 && page != null && page >= 0) {
+            sql.append(" LIMIT ").append(number).append(" OFFSET ").append(page * number);
         }
         String sqlStr = sql.toString().replace("  ", " ");
         Cursor cursor = getSQLiteDatabase().rawQuery(sqlStr, params);

@@ -1,7 +1,6 @@
 package pixel.database.app;
 
 import android.app.Activity;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -34,16 +33,14 @@ public class MainActivity extends Activity {
         // 查询
         if (view.getId() == R.id.buttom_2) {
             String _id = mEditTextQueryId.getText().toString();
-            List<UserTable> objects;
+            List<UserTable> userTables;
             if (_id.length() <= 0) {
-                objects = PixelDao.query(UserTable.class);
+                userTables = PixelDao.query(UserTable.class);
+//                userTables = PixelDao.query(UserTable.class, (Object) null, null, 1L, 0L);   // 分页查找
             } else {
-                objects = PixelDao.query(UserTable.class, _id, "_id");
+                userTables = PixelDao.query(UserTable.class, _id, "_id", 1L, 0L);
             }
-
-            int version = PixelDao.getSQLiteDatabase().getVersion();
-
-            ((Button) view).setText(objects.toString() + "\n" + version);
+            ((Button) view).setText(userTables.toString());
         }
         // 更新
         if (view.getId() == R.id.buttom_3) {
