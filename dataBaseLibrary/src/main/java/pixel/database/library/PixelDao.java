@@ -12,10 +12,12 @@ import java.util.List;
  * Created by pixel on 2017/3/20.
  * <p>
  * SQLite支持的数据类型: NULL(空)、INTEGER(整数)、REAL（浮点数字）、TEXT(字符串文本)和BLOB(二进制对象)
+ * <p>
+ * 当前库支持 Integer, Long, Double, Byte, String 类型持久化到数据库
  */
 
 public abstract class PixelDao {
-    private static SQLiteDatabase mSqLiteDatabase = null;
+    private volatile static SQLiteDatabase mSqLiteDatabase = null;
 
     /**
      * 初始化数据库且根据实体创建数据库表
@@ -52,7 +54,7 @@ public abstract class PixelDao {
         return PixelDao.mSqLiteDatabase;
     }
 
-    public static void setSqLiteDatabase(SQLiteDatabase mSqLiteDatabase) {
+    public synchronized static void setSqLiteDatabase(SQLiteDatabase mSqLiteDatabase) {
         PixelDao.mSqLiteDatabase = mSqLiteDatabase;
     }
 
@@ -63,7 +65,7 @@ public abstract class PixelDao {
      * @return 数据库表名
      */
     public static String getTableName(Class<?> cls) {
-        return cls.getName().replace(".", "_"); // 数据库表名为对象全路径
+        return cls.getName().replace(".", "_").replace(" ", ""); // 数据库表名为对象全路径
     }
 
     /**
@@ -77,12 +79,19 @@ public abstract class PixelDao {
         Field[] fields = cls.getDeclaredFields();
         if (fields != null && fields.length > 0) {
             for (Field field : fields) {
-                // CREATE TABLE IF NOT EXISTS pixel_database_app_UserTable ( _id INTEGER PRIMARY KEY AUTOINCREMENT, age TEXT, name TEXT, $change TEXT, serialVersionUID TEXT )
-                if (field.getName().contains("$change") || field.getName().contains("serialVersionUID")
-                        || field.getName().startsWith("_")) {   // 所有下划线开头的属性都不实例化到数据库
-                    continue;
+                String fieldName = field.getName();
+                if (fieldName.contains("$change") || fieldName.contains("serialVersionUID") || fieldName.startsWith("_")) {
+                    continue;   // 过滤掉特殊字符 所有下划线开头的属性都不实例化到数据库
                 }
-                field.setAccessible(true); // field.isAccessible() 过滤私有的属性
+                String fieldType = field.getType().toString();
+                if (!fieldType.contains("int") && !fieldType.contains("Integer") &&
+                        !fieldType.contains("long") && !fieldType.contains("Long") &&
+                        !fieldType.contains("double") && !fieldType.contains("Double") &&
+                        !fieldType.contains("byte") && !fieldType.contains("Byte") &&
+                        !fieldType.contains("char") && !fieldType.contains("String")) {
+                    continue;   // 过滤掉不支持的类型
+                }
+                field.setAccessible(true); // 不过滤私有的属性
                 columnInfos.add(new ColumnInfo(field.getName(), field.getType().getName(), field));
             }
         }
@@ -409,7 +418,7 @@ public abstract class PixelDao {
                         info.field.set(object, cursor.getDouble(cursor.getColumnIndex(info.columnName)));
                     } else if (info.typeString.contains("byte") || info.typeString.contains("Byte")) {
                         info.field.set(object, cursor.getBlob(cursor.getColumnIndex(info.columnName)));
-                    } else {
+                    } else {    // 默认 String 类型
                         info.field.set(object, cursor.getString(cursor.getColumnIndex(info.columnName)));
                     }
                     if (object instanceof OnDbIdCallback) {
