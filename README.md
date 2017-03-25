@@ -11,7 +11,7 @@
 ####   // 如果需要监听数据库版本变更,初始化时可以传入一个监听器.
 ###### // PixelDao.initDataBase(this, "pdb.db", 2, new OnDbUpdateCallback() {
 ###### //            &nbsp;&nbsp;@Override
-###### //            &nbsp;&nbsp;public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+###### //            &nbsp;&nbsp;public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion, Class<?>... tables) {
 ###### //                &nbsp;&nbsp;&nbsp;&nbsp;Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);
 ###### //            &nbsp;&nbsp;}
 ###### //        }, UserTable.class, MsgTable.class);
