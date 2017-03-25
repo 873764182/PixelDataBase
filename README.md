@@ -26,4 +26,4 @@
 ###### SQLiteDatabase database = PixelDao.getSQLiteDatabase();
 ### 目前已知的还需要优化的点
 ###### 增加对多表的联合操作.
-###### 对表的列的增量更新的操作.
+###### 对数据表的增量更新操作.
