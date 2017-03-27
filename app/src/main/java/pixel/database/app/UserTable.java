@@ -12,6 +12,7 @@ public class UserTable implements OnDbIdCallback {
 
     public Long _id;    // 下划线开头的的字段将不会实例化到数据库
     public String name;
+//    public String username;
     public Integer age;
 
     public List<String> list;   // 不会被实例化到数据库   目前仅支持 Integer, Long, Double, Byte, String 类型持久化到数据库
@@ -21,6 +22,7 @@ public class UserTable implements OnDbIdCallback {
 
     public UserTable(String name, Integer age) {
         this.name = name;
+//        this.username = name;
         this.age = age;
     }
 
@@ -29,6 +31,7 @@ public class UserTable implements OnDbIdCallback {
         return "UserTable{" +
                 "_id=" + _id +
                 ", name='" + name + '\'' +
+//                ", name='" + username + '\'' +
                 ", age=" + age +
                 ", list=" + list +
                 '}';

@@ -6,9 +6,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import pixel.database.library.ColumnMapping;
 import pixel.database.library.PixelDao;
+import pixel.database.library.PixelTools;
 
 public class MainActivity extends Activity {
     private EditText mEditTextUpdateId;
@@ -28,7 +31,15 @@ public class MainActivity extends Activity {
     public void onViewClick(View view) {
         // 插入
         if (view.getId() == R.id.buttom_1) {
-            PixelDao.insert(new UserTable("测试", 100));
+//            PixelDao.insert(new UserTable("测试", 100));
+
+//            List<TableInfo> tableInfoList = PixelTools.getTableInfo(PixelDao.getTableName(UserTable.class));
+//            new AlertDialog.Builder(this).setMessage(tableInfoList.toString()).show();
+
+            PixelTools.updateTable(UserTable.class, new ArrayList<ColumnMapping>() {{
+                add(new ColumnMapping("username", "name"));
+                add(new ColumnMapping("age", "age"));
+            }});
         }
         // 查询
         if (view.getId() == R.id.buttom_2) {
