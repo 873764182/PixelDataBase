@@ -189,6 +189,17 @@ public abstract class PixelDao {
     }
 
     /**
+     * 插入数据列表
+     *
+     * @param objects 数据实体列表
+     */
+    public static void insert(List<Object> objects) {
+        for (Object object : objects) {
+            insert(object);
+        }
+    }
+
+    /**
      * 删除表数据
      *
      * @param cls Java实体
