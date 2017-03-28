@@ -8,6 +8,7 @@ import com.facebook.stetho.Stetho;
 
 import pixel.database.library.OnDbUpdateCallback;
 import pixel.database.library.PixelDao;
+import pixel.database.library.PixelTools;
 
 /**
  * Created by pixel on 2017/3/20.
@@ -27,9 +28,15 @@ public class App extends Application {
                 Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);
                 if (oldVersion < newVersion) {
                     // 删除目前所有的表
-                    PixelDao.deleteTable(tables);
+//                    PixelDao.deleteTable(tables);
                     // 重新生成数据库表
-                    PixelDao.createTable(tables);
+//                    PixelDao.createTable(tables);
+
+                    for (Class<?> table : tables) {
+                        if (table == UserTable.class) {
+                            PixelTools.updateTable(table, null);    // 更新表结构,不保留原数据
+                        }
+                    }
                 }
             }
         }, UserTable.class, MsgTable.class);   // 初始化数据库与创建数据库表

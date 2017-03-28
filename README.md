@@ -15,7 +15,13 @@
 ###### // PixelDao.initDataBase(this, "pdb.db", 2, new OnDbUpdateCallback() {
 ###### //      @Override
 ###### //      public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion, Class<?>... tables) {
-###### //           Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);
+###### //           if (oldVersion < newVersion) {
+###### //               for (Class<?> table : tables) {
+###### //                   if (table == UserTable.class) {
+###### //                       PixelTools.updateTable(table, null);    // 更新表结构,不保留原数据
+###### //                   }
+###### //               }
+###### //           }
 ###### //      }
 ###### // }, UserTable.class, MsgTable.class);
 
