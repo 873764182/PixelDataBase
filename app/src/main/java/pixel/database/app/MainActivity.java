@@ -6,10 +6,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import pixel.database.library.ColumnMapping;
 import pixel.database.library.PixelDao;
 import pixel.database.library.PixelTools;
 
@@ -31,15 +29,7 @@ public class MainActivity extends Activity {
     public void onViewClick(View view) {
         // 插入
         if (view.getId() == R.id.buttom_1) {
-//            PixelDao.insert(new UserTable("测试", 100));
-
-//            List<TableInfo> tableInfoList = PixelTools.getTableInfo(PixelDao.getTableName(UserTable.class));
-//            new AlertDialog.Builder(this).setMessage(tableInfoList.toString()).show();
-
-            PixelTools.updateTable(UserTable.class, new ArrayList<ColumnMapping>() {{
-                add(new ColumnMapping("username", "name"));
-                add(new ColumnMapping("age", "age"));
-            }});
+            PixelDao.insert(new UserTable("测试", 100));
         }
         // 查询
         if (view.getId() == R.id.buttom_2) {
@@ -63,5 +53,17 @@ public class MainActivity extends Activity {
             String _id = mEditTextDeleteId.getText().toString();
             PixelDao.delete(UserTable.class, _id, "_id");
         }
+        if (view.getId() == R.id.buttom_5) {
+//            List<TableInfo> tableInfoList = PixelTools.getTableInfo(PixelDao.getTableName(UserTable.class));
+//            new AlertDialog.Builder(this).setMessage(tableInfoList.toString()).show();
+
+//            PixelTools.updateTable(UserTable.class, new ArrayList<ColumnMapping>() {{ // 需要保留原数据,传入旧列名与新列名的对应关系,没变更的列名也需要传入.
+//                add(new ColumnMapping("username", "name"));
+//                add(new ColumnMapping("age", "age"));
+//            }});
+
+            PixelTools.updateTable(UserTable.class, null);  // 不需要保留原数据
+        }
+
     }
 }

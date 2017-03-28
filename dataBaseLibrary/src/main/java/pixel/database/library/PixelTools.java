@@ -89,10 +89,10 @@ public abstract class PixelTools extends PixelDao {
 
     /**
      * 复制一个表的数据到另一个表,要求原表与新表字段完全一样.
-     * INSERT INTO Subscription SELECT OrderId, “”, ProductId FROM __temp__Subscription;
+     * INSERT INTO Subscription SELECT OrderId, "", ProductId FROM __temp__Subscription;
      * 　　或者
-     * INSERT INTO Subscription() SELECT OrderId, “”, ProductId FROM __temp__Subscription;
-     * 　　* 注意 双引号”” 是用来补充原来不存在的数据的
+     * INSERT INTO Subscription() SELECT OrderId, "", ProductId FROM __temp__Subscription;
+     * 　　* 注意 双引号"" 是用来补充原来不存在的数据的
      *
      * @param oldTableName 旧表
      * @param newTableName 新表
@@ -116,6 +116,77 @@ public abstract class PixelTools extends PixelDao {
             String tableNameTemp = tableName + "_temp";
             tableRename(tableName, tableNameTemp);
             createTable(table);
+
+            if (columnMappingList == null || columnMappingList.size() <= 0) {
+                deleteTable(tableNameTemp);
+                getSQLiteDatabase().setTransactionSuccessful();
+                return;
+            }
+
+            cursor = getSQLiteDatabase().rawQuery("SELECT * FROM " + tableNameTemp, null);
+            while (cursor.moveToNext()) {
+                Object[] params = new Object[columnMappingList.size() + 1];
+                params[0] = cursor.getLong(cursor.getColumnIndex("_id"));
+                for (int i = 0; i < columnMappingList.size(); i++) {
+                    params[i + 1] = cursor.getString(cursor.getColumnIndex(columnMappingList.get(i).oldColumn));
+                }
+
+                StringBuilder insertSql = new StringBuilder("INSERT INTO ");
+                insertSql.append(tableName);
+                insertSql.append(" ( _id, ");
+                for (int i = 0; i < columnMappingList.size(); i++) {
+                    insertSql.append(columnMappingList.get(i).newColumn);
+                    if (i < columnMappingList.size() - 1) {
+                        insertSql.append(", ");
+                    }
+                }
+
+                insertSql.append(" ) VALUES ( ?, ");
+                for (int i = 0; i < columnMappingList.size(); i++) {
+                    insertSql.append(" ? ");
+                    if (i < columnMappingList.size() - 1) {
+                        insertSql.append(", ");
+                    }
+                }
+                insertSql.append(" ) ");
+                getSQLiteDatabase().execSQL(insertSql.toString(), params);
+            }
+
+            deleteTable(tableNameTemp);
+
+            getSQLiteDatabase().setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("PixelTools", "更新表信息异常", e);
+        } finally {
+            getSQLiteDatabase().endTransaction();
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    /**
+     * 更新表信息
+     * 未做参数化查询 参数有特殊字符会出现异常
+     *
+     * @param table             表对应的实体
+     * @param columnMappingList 表的列的对应关系
+     */
+    public static void updateTableNoFormatParam(Class<?> table, List<ColumnMapping> columnMappingList) {
+        Cursor cursor = null;
+        try {
+            getSQLiteDatabase().beginTransaction();
+
+            String tableName = getTableName(table);
+            String tableNameTemp = tableName + "_temp";
+            tableRename(tableName, tableNameTemp);
+            createTable(table);
+
+            if (columnMappingList == null || columnMappingList.size() <= 0) {
+                deleteTable(tableNameTemp);
+                getSQLiteDatabase().setTransactionSuccessful();
+                return;
+            }
 
             cursor = getSQLiteDatabase().rawQuery("SELECT * FROM " + tableNameTemp, null);
             while (cursor.moveToNext()) {

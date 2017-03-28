@@ -80,6 +80,13 @@
                 android:onClick="onViewClick"
                 android:text="删除" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/buttom_5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onViewClick"
+            android:text="更新表结构" />
     </LinearLayout>
 
 </ScrollView>
