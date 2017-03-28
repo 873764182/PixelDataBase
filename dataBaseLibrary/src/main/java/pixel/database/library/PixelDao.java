@@ -344,7 +344,7 @@ public abstract class PixelDao {
      * @return 表数据
      */
     public static <T extends Object> List<T> query(Class<T> cls) {
-        return query(cls, (Object) null, null, null, null);
+        return query(cls, null, null);
     }
 
     /**
@@ -355,8 +355,20 @@ public abstract class PixelDao {
      * @param page   页数(从0开始)
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Long number, Long page) {
+    public static <T extends Object> List<T> query(Class<T> cls, long number, long page) {
         return query(cls, (Object) null, null, number, page);
+    }
+
+    /**
+     * 查询表数据
+     *
+     * @param cls    Java实体
+     * @param key    参数
+     * @param column 列名
+     * @return 表数据
+     */
+    public static <T extends Object> List<T> query(Class<T> cls, Object key, String column) {
+        return query(cls, key, column, -1, -1);
     }
 
     /**
@@ -369,7 +381,7 @@ public abstract class PixelDao {
      * @param page   页数
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Object key, String column, Long number, Long page) {
+    public static <T extends Object> List<T> query(Class<T> cls, Object key, String column, long number, long page) {
         return query(cls, key != null ? new Object[]{key} : null, column != null ? new String[]{column} : null, number, page);
     }
 
@@ -383,7 +395,7 @@ public abstract class PixelDao {
      * @param page    页数(从0开始)
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, Long number, Long page) {
+    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, long number, long page) {
         return query(cls, keys, columns, number, page, false);
     }
 
@@ -398,7 +410,7 @@ public abstract class PixelDao {
      * @param or      是否是 或
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, Long number, Long page, boolean or) {
+    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, long number, long page, boolean or) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ");
         sql.append(getTableName(cls));
         String[] params = null;
@@ -421,7 +433,7 @@ public abstract class PixelDao {
             }
             sql.append(" ) ");
         }
-        if (number != null && number >= 0 && page != null && page >= 0) {
+        if (number != -1 && number >= 0 && page != -1 && page >= 0) {
             sql.append(" LIMIT ").append(number).append(" OFFSET ").append(page * number);
         }
         String sqlStr = sql.toString().replace("  ", " ");
