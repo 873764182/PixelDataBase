@@ -17,7 +17,6 @@
             android:onClick="onViewClick"
             android:text="插入" />
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -28,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:hint="_id"
-                android:inputType="number" />
+                android:inputType="text" />
 
             <Button
                 android:id="@+id/buttom_2"

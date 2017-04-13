@@ -350,13 +350,13 @@ public abstract class PixelDao {
     /**
      * 查询表数据
      *
-     * @param cls    Java实体
-     * @param number 页条数
-     * @param page   页数(从0开始)
+     * @param cls  Java实体
+     * @param size 页条数
+     * @param page 页数(从0开始)
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, long number, long page) {
-        return query(cls, (Object) null, null, number, page);
+    public static <T extends Object> List<T> query(Class<T> cls, long size, long page) {
+        return query(cls, (Object) null, null, size, page);
     }
 
     /**
@@ -377,12 +377,12 @@ public abstract class PixelDao {
      * @param cls    Java实体
      * @param key    参数值
      * @param column 数据库列名
-     * @param number 页条数
+     * @param size   页条数
      * @param page   页数
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Object key, String column, long number, long page) {
-        return query(cls, key != null ? new Object[]{key} : null, column != null ? new String[]{column} : null, number, page);
+    public static <T extends Object> List<T> query(Class<T> cls, Object key, String column, long size, long page) {
+        return query(cls, key != null ? new Object[]{key} : null, column != null ? new String[]{column} : null, size, page);
     }
 
     /**
@@ -391,12 +391,12 @@ public abstract class PixelDao {
      * @param cls     Java实体
      * @param keys    参数值集合
      * @param columns 数据库列名集合
-     * @param number  页条数
+     * @param size    页条数
      * @param page    页数(从0开始)
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, long number, long page) {
-        return query(cls, keys, columns, number, page, false);
+    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, long size, long page) {
+        return query(cls, keys, columns, false, size, page);
     }
 
     /**
@@ -405,12 +405,13 @@ public abstract class PixelDao {
      * @param cls     Java实体
      * @param keys    参数值集合
      * @param columns 数据库列名集合
-     * @param number  页条数
+     * @param size    页条数
      * @param page    页数(从0开始)
      * @param or      是否是 或
      * @return 表数据
      */
-    public static <T extends Object> List<T> query(Class<T> cls, Object[] keys, String[] columns, long number, long page, boolean or) {
+    public static <T extends Object> List<T> query(
+            Class<T> cls, Object[] keys, String[] columns, boolean or, long size, long page) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ");
         sql.append(getTableName(cls));
         String[] params = null;
@@ -433,8 +434,94 @@ public abstract class PixelDao {
             }
             sql.append(" ) ");
         }
-        if (number != -1 && number >= 0 && page != -1 && page >= 0) {
-            sql.append(" LIMIT ").append(number).append(" OFFSET ").append(page * number);
+        if (size >= 0 && page >= 0) {
+            sql.append(" LIMIT ").append(size).append(" OFFSET ").append(page * size);
+        }
+        String sqlStr = sql.toString().replace("  ", " ");
+        Cursor cursor = getSQLiteDatabase().rawQuery(sqlStr, params);
+        return cursorToList(cls, cursor);
+    }
+
+    /**
+     * 根据列模糊查询
+     *
+     * @param cls    Java实体
+     * @param key    参数值
+     * @param column 数据库列名
+     * @param <T>    数据库模型
+     * @return 查询结果
+     */
+    public static <T extends Object> List<T> search(Class<T> cls, Object key, String column) {
+        return search(cls, key, column, -1);
+    }
+
+    /**
+     * 根据列模糊查询
+     *
+     * @param cls        Java实体
+     * @param key        参数值
+     * @param column     数据库列名
+     * @param resultSize 返回最大条数
+     * @param <T>        数据库模型
+     * @return 查询结果
+     */
+    public static <T extends Object> List<T> search(Class<T> cls, Object key, String column, long resultSize) {
+        return querySupport(cls, new Object[]{key}, new String[]{column}, false, true, null, false, resultSize, resultSize == -1 ? -1 : 0);
+    }
+
+    /**
+     * 查询表数据
+     *
+     * @param cls         Java实体
+     * @param keys        参数值集合
+     * @param columns     数据库列名集合
+     * @param isOr        是否是 或
+     * @param isFuzzy     是否模糊查询 默认否
+     * @param sortColumns 排序列
+     * @param isDesc      是否倒叙 默认否
+     * @param size        页条数(-1不分页)
+     * @param page        页数(从0开始 -1不分页)
+     * @param <T>         数据库模型
+     * @return 表数据
+     */
+    public static <T extends Object> List<T> querySupport(
+            Class<T> cls, Object[] keys, String[] columns, boolean isOr, boolean isFuzzy, String sortColumns, boolean isDesc, long size, long page) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM ");
+        sql.append(getTableName(cls));
+        String[] params = null;
+        if (keys != null && columns != null) {
+            params = new String[columns.length];
+            if (keys.length != columns.length) {
+                throw new IllegalArgumentException("参数与数据库列长度不一致");
+            }
+            sql.append(" WHERE ( ");
+            for (int i = 0; i < columns.length; i++) {
+                if (isFuzzy) {
+                    sql.append(columns[i]).append(" LIKE ").append(" ? ");
+                } else {
+                    sql.append(columns[i]).append(" = ").append(" ? ");
+                }
+                if (i != columns.length - 1) {
+                    if (isOr) {
+                        sql.append(" OR ");
+                    } else {
+                        sql.append(" AND ");
+                    }
+                }
+                params[i] = "%" + keys[i].toString() + "%";
+            }
+            sql.append(" ) ");
+        }
+        if (sortColumns != null) {
+            sql.append(" ORDER BY ").append(sortColumns);
+            if (isDesc) {
+                sql.append(" DESC ");
+            } else {
+                sql.append(" ASC ");
+            }
+        }
+        if (size >= 0 && page >= 0) {
+            sql.append(" LIMIT ").append(size).append(" OFFSET ").append(page * size);
         }
         String sqlStr = sql.toString().replace("  ", " ");
         Cursor cursor = getSQLiteDatabase().rawQuery(sqlStr, params);

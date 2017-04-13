@@ -29,7 +29,7 @@ public class MainActivity extends Activity {
     public void onViewClick(View view) {
         // 插入
         if (view.getId() == R.id.buttom_1) {
-            PixelDao.insert(new UserTable("测试", 100));
+            PixelDao.insert(new UserTable("测试开发", 100));
         }
         // 查询
         if (view.getId() == R.id.buttom_2) {
@@ -39,7 +39,8 @@ public class MainActivity extends Activity {
                 userTables = PixelDao.query(UserTable.class);
 //                userTables = PixelDao.query(UserTable.class, (Object) null, null, 1L, 0L);   // 分页查找
             } else {
-                userTables = PixelDao.query(UserTable.class, _id, "_id", 1L, 0L);
+//                userTables = PixelDao.query(UserTable.class, _id, "_id", 1L, 0L);
+                userTables = PixelDao.query2(UserTable.class, new String[]{_id}, new String[]{"name"}, false, true, "name", false, 20, 0);
             }
             ((Button) view).setText(userTables.toString());
         }
