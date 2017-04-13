@@ -452,7 +452,7 @@ public abstract class PixelDao {
      * @return 查询结果
      */
     public static <T extends Object> List<T> search(Class<T> cls, Object key, String column) {
-        return search(cls, key, column, -1);
+        return search(cls, key, column, null, -1);
     }
 
     /**
@@ -466,7 +466,36 @@ public abstract class PixelDao {
      * @return 查询结果
      */
     public static <T extends Object> List<T> search(Class<T> cls, Object key, String column, long resultSize) {
-        return querySupport(cls, new Object[]{key}, new String[]{column}, false, true, null, false, resultSize, resultSize == -1 ? -1 : 0);
+        return search(cls, key, column, null, resultSize);
+    }
+
+    /**
+     * 根据列模糊查询
+     *
+     * @param cls         Java实体
+     * @param key         参数值
+     * @param column      数据库列名
+     * @param sortColumns 排序字段
+     * @param <T>         数据库模型
+     * @return 查询结果
+     */
+    public static <T extends Object> List<T> search(Class<T> cls, Object key, String column, String sortColumns) {
+        return search(cls, key, column, sortColumns, -1);
+    }
+
+    /**
+     * 根据列模糊查询
+     *
+     * @param cls         Java实体
+     * @param key         参数值
+     * @param column      数据库列名
+     * @param sortColumns 排序字段
+     * @param resultSize  返回最大条数
+     * @param <T>         数据库模型
+     * @return 查询结果
+     */
+    public static <T extends Object> List<T> search(Class<T> cls, Object key, String column, String sortColumns, long resultSize) {
+        return querySupport(cls, new Object[]{key}, new String[]{column}, false, true, sortColumns, false, resultSize, resultSize == -1 ? -1 : 0);
     }
 
     /**

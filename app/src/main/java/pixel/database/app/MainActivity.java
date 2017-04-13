@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
 //                userTables = PixelDao.query(UserTable.class, (Object) null, null, 1L, 0L);   // 分页查找
             } else {
 //                userTables = PixelDao.query(UserTable.class, _id, "_id", 1L, 0L);
-                userTables = PixelDao.query2(UserTable.class, new String[]{_id}, new String[]{"name"}, false, true, "name", false, 20, 0);
+                userTables = PixelDao.querySupport(UserTable.class, new String[]{_id}, new String[]{"name"}, false, true, "name", false, 20, 0);
             }
             ((Button) view).setText(userTables.toString());
         }
