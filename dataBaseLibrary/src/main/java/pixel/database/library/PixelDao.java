@@ -6,7 +6,9 @@ import android.database.sqlite.SQLiteDatabase;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by pixel on 2017/3/20.
@@ -17,7 +19,11 @@ import java.util.List;
  */
 
 public abstract class PixelDao {
+
+    /* 数据库对象 */
     private volatile static SQLiteDatabase mSqLiteDatabase = null;
+    /* 缓存变字典信息 */
+    private volatile static Map<String, List<ColumnInfo>> mColumnInfoMap = new Hashtable<>();
 
     /**
      * 初始化数据库且根据实体创建数据库表
@@ -68,6 +74,30 @@ public abstract class PixelDao {
         return cls.getName().replace(".", "_").replace(" ", ""); // 数据库表名为对象全路径
     }
 
+//    public static List<ColumnInfo> getColumnInfo(Class<?> cls) {
+//        List<ColumnInfo> columnInfos = new ArrayList<>();
+//        Field[] fields = cls.getDeclaredFields();
+//        if (fields != null && fields.length > 0) {
+//            for (Field field : fields) {
+//                String fieldName = field.getName();
+//                if (fieldName.contains("$change") || fieldName.contains("serialVersionUID") || fieldName.startsWith("$")) {
+//                    continue;   //
+//                }
+//                String fieldType = field.getType().getName();
+//                if (!fieldType.contains("int") && !fieldType.contains("Integer") &&
+//                        !fieldType.contains("long") && !fieldType.contains("Long") &&
+//                        !fieldType.contains("double") && !fieldType.contains("Double") &&
+//                        !fieldType.contains("byte") && !fieldType.contains("Byte") &&
+//                        !fieldType.contains("char") && !fieldType.contains("String")) {
+//                    continue;   // 过滤掉不支持的类型
+//                }
+//                field.setAccessible(true); // 不过滤私有的属性
+//                columnInfos.add(new ColumnInfo(field.getName(), field.getType().getName(), field));
+//            }
+//        }
+//        return columnInfos;
+//    }
+
     /**
      * 获取Java实体属性信息
      *
@@ -75,14 +105,16 @@ public abstract class PixelDao {
      * @return 属性描述信息
      */
     public static List<ColumnInfo> getColumnInfo(Class<?> cls) {
-        List<ColumnInfo> columnInfos = new ArrayList<>();
+        List<ColumnInfo> columnInfos = mColumnInfoMap.get(cls.getName());
+        if (columnInfos != null) {
+            return columnInfos;
+        }
+        columnInfos = new ArrayList<>();
+
         Field[] fields = cls.getDeclaredFields();
         if (fields != null && fields.length > 0) {
             for (Field field : fields) {
-                String fieldName = field.getName();
-                if (fieldName.contains("$change") || fieldName.contains("serialVersionUID") || fieldName.startsWith("$")) {
-                    continue;   // TODO 过滤掉特殊字符 所有"$"美元符号开头的属性都不实例化到数据库 后期考虑用注解的方式实现
-                }
+                field.setAccessible(true); // 不过滤私有的属性
                 String fieldType = field.getType().getName();
                 if (!fieldType.contains("int") && !fieldType.contains("Integer") &&
                         !fieldType.contains("long") && !fieldType.contains("Long") &&
@@ -91,10 +123,16 @@ public abstract class PixelDao {
                         !fieldType.contains("char") && !fieldType.contains("String")) {
                     continue;   // 过滤掉不支持的类型
                 }
-                field.setAccessible(true); // 不过滤私有的属性
-                columnInfos.add(new ColumnInfo(field.getName(), field.getType().getName(), field));
+                // 是否存需要映射到数据库
+                if (field.isAnnotationPresent(MapField.class)) {
+                    MapField mapField = field.getAnnotation(MapField.class);
+                    if (mapField != null && mapField.enable()) {
+                        columnInfos.add(new ColumnInfo(field.getName(), field.getType().getName(), field));
+                    }
+                }
             }
         }
+        mColumnInfoMap.put(cls.getName(), columnInfos);
         return columnInfos;
     }
 

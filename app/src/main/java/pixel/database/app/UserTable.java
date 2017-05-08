@@ -2,6 +2,7 @@ package pixel.database.app;
 
 import java.util.List;
 
+import pixel.database.library.MapField;
 import pixel.database.library.OnDbIdCallback;
 
 /**
@@ -10,9 +11,14 @@ import pixel.database.library.OnDbIdCallback;
 
 public class UserTable implements OnDbIdCallback {
 
-    public Long $id;    // 美元符号开头的属性将不会被实例化到数据库
+    public Long $id;
+
+    @MapField
     public String name;
+
 //    public String username;
+
+    @MapField
     public Integer age;
 
     public List<String> list;   // 不会被实例化到数据库   目前仅支持 Integer, Long, Double, Byte, String 类型持久化到数据库

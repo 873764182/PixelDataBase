@@ -1,12 +1,18 @@
 package pixel.database.app;
 
+import pixel.database.library.MapField;
+
 /**
  * Created by pixel on 2017/3/22.
  */
 
 public class MsgTable {
-    public Long $id;    // 美元符号开头的属性将不会被实例化到数据库
+    public Long $id;
+
+    @MapField
     public Integer code;
+
+    @MapField
     public String content;
 
     public MsgTable() {

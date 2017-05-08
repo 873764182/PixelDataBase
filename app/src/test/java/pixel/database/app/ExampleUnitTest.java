@@ -4,9 +4,12 @@ import android.database.Cursor;
 
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import pixel.database.app.annotation.MappField;
+import pixel.database.app.entity.UserTable;
 import pixel.database.library.ColumnInfo;
 import pixel.database.library.OnDbIdCallback;
 import pixel.database.library.PixelDao;
@@ -133,4 +136,26 @@ public class ExampleUnitTest {
         }
         return objects;
     }
+
+
+    @Test
+    public void testAnnotation() throws NoSuchFieldException {  // 注解测试
+        System.out.println("=== 测试注解 ===");
+        UserTable userTable = new UserTable(123L, "名字", 10);
+        Class<UserTable> userTableClass = (Class<UserTable>) userTable.getClass();
+
+        Field idField = userTableClass.getDeclaredField("_id");
+        Field nameField = userTableClass.getDeclaredField("name");
+        Field ageField = userTableClass.getDeclaredField("age");
+
+        boolean idFlag = idField.isAnnotationPresent(MappField.class);
+        boolean nameFlag = nameField.isAnnotationPresent(MappField.class);
+        boolean ageFlag = ageField.isAnnotationPresent(MappField.class);
+
+        System.out.println("注解存在 -> " + idFlag + "\t" + nameFlag + "\t" + ageFlag);
+
+        MappField mappField = nameField.getAnnotation(MappField.class);
+        System.out.println(mappField.description() + "\t" + mappField.value() + "\t" + mappField.enable() + "\t" + mappField.length());
+    }
+
 }
