@@ -5,15 +5,15 @@ package pixel.database.app;
  */
 
 public class MsgTable {
-    public Long _id;
+    public Long $id;    // 美元符号开头的属性将不会被实例化到数据库
     public Integer code;
     public String content;
 
     public MsgTable() {
     }
 
-    public MsgTable(Long _id, Integer code, String content) {
-        this._id = _id;
+    public MsgTable(Long $id, Integer code, String content) {
+        this.$id = $id;
         this.code = code;
         this.content = content;
     }
@@ -21,7 +21,7 @@ public class MsgTable {
     @Override
     public String toString() {
         return "MsgTable{" +
-                "_id=" + _id +
+                "_id=" + $id +
                 ", code=" + code +
                 ", content='" + content + '\'' +
                 '}';

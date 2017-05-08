@@ -80,8 +80,8 @@ public abstract class PixelDao {
         if (fields != null && fields.length > 0) {
             for (Field field : fields) {
                 String fieldName = field.getName();
-                if (fieldName.contains("$change") || fieldName.contains("serialVersionUID") || fieldName.startsWith("_")) {
-                    continue;   // 过滤掉特殊字符 所有下划线开头的属性都不实例化到数据库
+                if (fieldName.contains("$change") || fieldName.contains("serialVersionUID") || fieldName.startsWith("$")) {
+                    continue;   // TODO 过滤掉特殊字符 所有"$"美元符号开头的属性都不实例化到数据库 后期考虑用注解的方式实现
                 }
                 String fieldType = field.getType().getName();
                 if (!fieldType.contains("int") && !fieldType.contains("Integer") &&

@@ -10,7 +10,7 @@ import pixel.database.library.OnDbIdCallback;
 
 public class UserTable implements OnDbIdCallback {
 
-    public Long _id;    // 下划线开头的的字段将不会实例化到数据库
+    public Long $id;    // 美元符号开头的属性将不会被实例化到数据库
     public String name;
 //    public String username;
     public Integer age;
@@ -29,7 +29,7 @@ public class UserTable implements OnDbIdCallback {
     @Override
     public String toString() {
         return "UserTable{" +
-                "_id=" + _id +
+                "_id=" + $id +
                 ", name='" + name + '\'' +
 //                ", name='" + username + '\'' +
                 ", age=" + age +
@@ -39,6 +39,6 @@ public class UserTable implements OnDbIdCallback {
 
     @Override
     public void setId(Long _id) {
-        this._id = _id; // OnDbIdCallback接口方法,回传数据库ID值.
+        this.$id = _id; // OnDbIdCallback接口方法,回传数据库ID值.
     }
 }
