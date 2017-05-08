@@ -12,8 +12,10 @@
 
 ### 2. 创建你的实体类
         为需要实例化到数据库的字段添加 "@MapField" 注解, 如下:
+
         @MapField
         public String name;
+
         支持的类型: Integer, Long, Double, Byte, String. 其他类型将会实例化到数据库时失败.
 
 ### 3. 初始化
