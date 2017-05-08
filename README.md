@@ -19,7 +19,7 @@
         支持的类型: Integer, Long, Double, Byte, String. 其他类型将会实例化到数据库时失败.
 
 ### 3. 初始化
-#### 传入数据库 名称 与 需要生成表的 Java实体 对象列表.
+#### 传入数据库 名称 与 需要生成表的 Java实体 对象列表(第二步建立的实体对象).
         PixelDao.initDataBase(getApplicationContext(), "pdb.db", 1, UserTable.class, MsgTable.class);
 #### 如果需要监听数据库版本变更,初始化时可以传入一个监听器.
         PixelDao.initDataBase(this, "pdb.db", 2, new OnDbUpdateCallback() {
