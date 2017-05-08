@@ -3,7 +3,7 @@
         
         不需要书写任何SQL语句即可实现对数据库的 创表 增 删 查 改 分页 操作.
          
-        所有的操作方法都是静态的方法,依赖库是一个仅为14k大小的jar,代码污染率极低.所有的操作方法都集成在 "PixelDao"与"PixelTools"两个对象上.PixelTools是PixelDao的子类.直接使用PixelTools即可.
+        所有的操作方法都是静态的方法,依赖库是一个仅为 10+ K 大小的jar,代码污染率极低.所有的操作方法都集成在 "PixelDao"与"PixelTools"两个对象上.PixelTools是PixelDao的子类.直接使用PixelTools即可.
 
 ## 开始使用
 
