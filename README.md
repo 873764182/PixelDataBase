@@ -1,4 +1,4 @@
-## 轻量的 Android SQLite 数据库工具集合
+## 轻量的 Android SQLite 数据库工具集合, 适合用SQLite做一些数据存储的项目.
         根据Java实体自动生成数据库表.
         
         不需要书写任何SQL语句即可实现对数据库的 创表 增 删 查 改 分页 操作.
@@ -47,6 +47,8 @@
         List<UserTable> userTables = PixelDao.query(UserTable.class, _id, "_id"); // 查询 (有条件: 数据库"_id"列要等于_id变量的值)
         
         List<UserTable> userTables = PixelDao.query(UserTable.class, _id, "_id", 20L, 0L); // 分页查询 (有条件: 数据库"_id"列要等于_id变量的值, 查询第0页, 每页20条.)
+
+        需要更复杂的查询可以考虑使用: PixelDao.querySupport(),或者获取SQLiteDatabase对象进行操作.
 
 ### 5. 更新表结构
         // 需要保留原数据,传入旧列名与新列名的对应关系,没变更的列名也需要传入.
