@@ -61,7 +61,8 @@
         SQLiteDatabase database = PixelDao.getSQLiteDatabase();
 
 ### 7. 目前已知的还需要优化的点
-        封装对多表的联合操作,但是这样可能需要建立类似Hibernate那样的映射XML配置文件,这样会增加库的复杂度.
+        1. 添加一个获取数据表有多少行的方法,可以带参数过滤增加过滤条件.
+        2. 封装对多表的联合查询操作,但是这样可能需要建立类似Hibernate那样的映射文件,支持库的复杂度会增加.
         
 ## 联系我
         [873764182@qq.com](https://mail.qq.com/cgi-bin/frame_html)
