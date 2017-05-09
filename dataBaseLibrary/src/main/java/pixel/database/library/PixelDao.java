@@ -3,6 +3,7 @@ package pixel.database.library;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -145,8 +146,14 @@ public abstract class PixelDao {
     public static void execSQL(String sql, Object[] params) {
         try {
             getSQLiteDatabase().beginTransaction();
-            getSQLiteDatabase().execSQL(sql, params);
+            if (params == null || params.length <= 0) { // 避免出现  java.lang.IllegalArgumentException: Empty bindArgs 异常
+                getSQLiteDatabase().execSQL(sql);
+            } else {
+                getSQLiteDatabase().execSQL(sql, params);
+            }
             getSQLiteDatabase().setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("PixelTools", "执行SQL语句异常", e);
         } finally {
             getSQLiteDatabase().endTransaction();
         }
