@@ -8,8 +8,7 @@ import android.widget.EditText;
 
 import java.util.List;
 
-import pixel.database.library.PixelDao;
-import pixel.database.library.PixelTools;
+import pixel.database.library.SqlTemplate;
 
 public class MainActivity extends Activity {
     private EditText mEditTextUpdateId;
@@ -29,41 +28,41 @@ public class MainActivity extends Activity {
     public void onViewClick(View view) {
         // 插入
         if (view.getId() == R.id.buttom_1) {
-            PixelDao.insert(new UserTable("测试开发", 100));
+            SqlTemplate.insert(new UserTable("测试开发", 100));
         }
         // 查询
         if (view.getId() == R.id.buttom_2) {
             String _id = mEditTextQueryId.getText().toString();
             List<UserTable> userTables;
             if (_id.length() <= 0) {
-                userTables = PixelDao.query(UserTable.class);
+                userTables = SqlTemplate.query(UserTable.class);
 //                userTables = PixelDao.query(UserTable.class, (Object) null, null, 1L, 0L);   // 分页查找
             } else {
 //                userTables = PixelDao.query(UserTable.class, _id, "_id", 1L, 0L);
-                userTables = PixelDao.querySupport(UserTable.class, new String[]{_id}, new String[]{"name"}, false, true, "name", false, 20, 0);
+                userTables = SqlTemplate.querySupport(UserTable.class, new String[]{_id}, new String[]{"name"}, false, true, "name", false, 20, 0);
             }
             ((Button) view).setText(userTables.toString());
         }
         // 更新
         if (view.getId() == R.id.buttom_3) {
             String _id = mEditTextUpdateId.getText().toString();
-            PixelDao.update(new UserTable("运行", 200), _id, "_id");
+            SqlTemplate.update(new UserTable("运行", 200), _id, "_id");
         }
         // 删除
         if (view.getId() == R.id.buttom_4) {
             String _id = mEditTextDeleteId.getText().toString();
-            PixelDao.delete(UserTable.class, _id, "_id");
+            SqlTemplate.delete(UserTable.class, _id, "_id");
         }
         if (view.getId() == R.id.buttom_5) {
-//            List<TableInfo> tableInfoList = PixelTools.getTableInfo(PixelDao.getTableName(UserTable.class));
+//            List<TableInfo> tableInfoList = SqlTemplate.getTableInfo(PixelDao.getTableName(UserTable.class));
 //            new AlertDialog.Builder(this).setMessage(tableInfoList.toString()).show();
 
-//            PixelTools.updateTable(UserTable.class, new ArrayList<ColumnMapping>() {{ // 需要保留原数据,传入旧列名与新列名的对应关系,没变更的列名也需要传入.
+//            SqlTemplate.updateTable(UserTable.class, new ArrayList<ColumnMapping>() {{ // 需要保留原数据,传入旧列名与新列名的对应关系,没变更的列名也需要传入.
 //                add(new ColumnMapping("username", "name"));
 //                add(new ColumnMapping("age", "age"));
 //            }});
 
-            PixelTools.updateTable(UserTable.class, null);  // 不需要保留原数据
+            SqlTemplate.updateTable(UserTable.class, null);  // 不需要保留原数据
         }
 
     }

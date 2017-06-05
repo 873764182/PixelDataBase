@@ -7,8 +7,7 @@ import android.util.Log;
 import com.facebook.stetho.Stetho;
 
 import pixel.database.library.OnDbUpdateCallback;
-import pixel.database.library.PixelDao;
-import pixel.database.library.PixelTools;
+import pixel.database.library.SqlTemplate;
 
 /**
  * Created by pixel on 2017/3/20.
@@ -22,7 +21,7 @@ public class App extends Application {
 
         Stetho.initializeWithDefaults(this);    // TODO 数据库调试 发布时去掉
 
-        PixelDao.initDataBase(this, "pdb.db", 1, new OnDbUpdateCallback() {
+        SqlTemplate.initDataBase(this, "pdb.db", 1, new OnDbUpdateCallback() {
             @Override
             public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion, Class<?>... tables) {
                 Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);
@@ -34,7 +33,7 @@ public class App extends Application {
 
                     for (Class<?> table : tables) {
                         if (table == UserTable.class) {
-                            PixelTools.updateTable(table, null);    // 更新表结构,不保留原数据
+                            SqlTemplate.updateTable(table, null);    // 更新表结构,不保留原数据
                         }
                     }
                 }

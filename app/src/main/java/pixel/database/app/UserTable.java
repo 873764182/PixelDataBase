@@ -2,8 +2,8 @@ package pixel.database.app;
 
 import java.util.List;
 
-import pixel.database.library.MapField;
 import pixel.database.library.OnDbIdCallback;
+import pixel.database.library.TableColumn;
 
 /**
  * Created by pixel on 2017/3/20.
@@ -13,12 +13,12 @@ public class UserTable implements OnDbIdCallback {
 
     public Long $id;
 
-    @MapField
+    @TableColumn
     public String name;
 
 //    public String username;
 
-    @MapField
+    @TableColumn
     public Integer age;
 
     public List<String> list;   // 不会被实例化到数据库   目前仅支持 Integer, Long, Double, Byte, String 类型持久化到数据库

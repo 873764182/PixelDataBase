@@ -20,13 +20,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        PixelDao.setSqLiteDatabase(db);
-        PixelDao.createTable(tables);
+        SqlTemplate.setSqLiteDatabase(db);
+        SqlTemplate.createTable(tables);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        PixelDao.setSqLiteDatabase(db);
+        SqlTemplate.setSqLiteDatabase(db);
         if (onDbUpdateCallback != null) {
             onDbUpdateCallback.onUpgrade(db, oldVersion, newVersion, tables);
         }

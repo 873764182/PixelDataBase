@@ -1,6 +1,6 @@
 package pixel.database.app;
 
-import pixel.database.library.MapField;
+import pixel.database.library.TableColumn;
 
 /**
  * Created by pixel on 2017/3/22.
@@ -9,10 +9,10 @@ import pixel.database.library.MapField;
 public class MsgTable {
     public Long $id;
 
-    @MapField
+    @TableColumn
     public Integer code;
 
-    @MapField
+    @TableColumn
     public String content;
 
     public MsgTable() {

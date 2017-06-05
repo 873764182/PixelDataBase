@@ -12,7 +12,6 @@ import pixel.database.app.annotation.MappField;
 import pixel.database.app.entity.UserTable;
 import pixel.database.library.ColumnInfo;
 import pixel.database.library.OnDbIdCallback;
-import pixel.database.library.PixelDao;
 
 import static org.junit.Assert.assertEquals;
 
