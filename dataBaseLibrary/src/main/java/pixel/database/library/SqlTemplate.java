@@ -159,6 +159,17 @@ public abstract class SqlTemplate {
     }
 
     /**
+     * 直接执行查询语句
+     *
+     * @param sql           查询语句
+     * @param selectionArgs 查询参数
+     * @return Cursor
+     */
+    public static Cursor rawQuery(String sql, String[] selectionArgs) {
+        return getSQLiteDatabase().rawQuery(sql, selectionArgs);
+    }
+
+    /**
      * 根据Java创建数据库表
      *
      * @param tables Java实体

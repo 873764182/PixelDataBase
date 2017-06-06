@@ -16,7 +16,7 @@
         @TableColumn
         public String name;
 
-        支持的类型: Integer, Long, Double, Byte, String. 其他类型将会实例化到数据库时失败.
+        支持的类型: Integer, Long, Double, String. 其他类型将会实例化到数据库时失败.
 
 ### 3. 初始化
 #### 传入数据库 名称 与 需要生成表的 Java实体 对象列表(第二步建立的实体对象).
