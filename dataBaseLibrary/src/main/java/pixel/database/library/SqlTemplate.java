@@ -74,30 +74,6 @@ public abstract class SqlTemplate {
         return cls.getName().replace(".", "_").replace(" ", ""); // 数据库表名为对象全路径
     }
 
-//    public static List<ColumnInfo> getColumnInfo(Class<?> cls) {
-//        List<ColumnInfo> columnInfos = new ArrayList<>();
-//        Field[] fields = cls.getDeclaredFields();
-//        if (fields != null && fields.length > 0) {
-//            for (Field field : fields) {
-//                String fieldName = field.getName();
-//                if (fieldName.contains("$change") || fieldName.contains("serialVersionUID") || fieldName.startsWith("$")) {
-//                    continue;   //
-//                }
-//                String fieldType = field.getType().getName();
-//                if (!fieldType.contains("int") && !fieldType.contains("Integer") &&
-//                        !fieldType.contains("long") && !fieldType.contains("Long") &&
-//                        !fieldType.contains("double") && !fieldType.contains("Double") &&
-//                        !fieldType.contains("byte") && !fieldType.contains("Byte") &&
-//                        !fieldType.contains("char") && !fieldType.contains("String")) {
-//                    continue;   // 过滤掉不支持的类型
-//                }
-//                field.setAccessible(true); // 不过滤私有的属性
-//                columnInfos.add(new ColumnInfo(field.getName(), field.getType().getName(), field));
-//            }
-//        }
-//        return columnInfos;
-//    }
-
     /**
      * 获取Java实体属性信息
      *
