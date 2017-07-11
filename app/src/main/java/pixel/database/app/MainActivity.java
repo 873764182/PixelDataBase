@@ -29,6 +29,7 @@ public class MainActivity extends Activity {
         // 插入
         if (view.getId() == R.id.buttom_1) {
             SqlTemplate.insert(new UserTable("测试开发", 100));
+//            SqlTemplate.insert(new TestTable("测试新增", 0));
         }
         // 查询
         if (view.getId() == R.id.buttom_2) {
@@ -42,6 +43,7 @@ public class MainActivity extends Activity {
                 userTables = SqlTemplate.querySupport(UserTable.class, new String[]{_id}, new String[]{"name"}, false, true, "name", false, 20, 0);
             }
             ((Button) view).setText(userTables.toString());
+//            ((Button) view).setText(SqlTemplate.query(TestTable.class).toString());
         }
         // 更新
         if (view.getId() == R.id.buttom_3) {

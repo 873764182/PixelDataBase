@@ -21,7 +21,7 @@ public class App extends Application {
 
         Stetho.initializeWithDefaults(this);    // TODO 数据库调试 发布时去掉
 
-        SqlTemplate.initDataBase(this, "pdb.db", 1, new OnDbUpdateCallback() {
+        SqlTemplate.initDataBase(this, "pdb.db", 2, new OnDbUpdateCallback() {
             @Override
             public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion, Class<?>... tables) {
                 Log.e(App.class.getSimpleName(), "数据库版本 -> " + oldVersion + "\t" + newVersion);
@@ -33,11 +33,11 @@ public class App extends Application {
 
                     for (Class<?> table : tables) {
                         if (table == UserTable.class) {
-                            SqlTemplate.updateTable(table, null);    // 更新表结构,不保留原数据
+                            SqlTemplate.updateOrCreateTable(table, null);    // 更新表结构,不保留原数据
                         }
                     }
                 }
             }
-        }, UserTable.class, MsgTable.class);   // 初始化数据库与创建数据库表
+        }, UserTable.class, MsgTable.class, TestTable.class);   // 初始化数据库与创建数据库表
     }
 }

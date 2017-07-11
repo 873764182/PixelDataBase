@@ -92,11 +92,15 @@ public abstract class SqlTemplate {
             for (Field field : fields) {
                 field.setAccessible(true); // 不过滤私有的属性
                 String fieldType = field.getType().getName();
-                if (!fieldType.contains("int") && !fieldType.contains("Integer") &&
-                        !fieldType.contains("long") && !fieldType.contains("Long") &&
-                        !fieldType.contains("double") && !fieldType.contains("Double") &&
+                // boolean, char, byte、short、int、long, float、double
+                if (!fieldType.contains("boolean") && !fieldType.contains("Boolean") &&
+                        !fieldType.contains("char") && !fieldType.contains("String") &&
                         !fieldType.contains("byte") && !fieldType.contains("Byte") &&
-                        !fieldType.contains("char") && !fieldType.contains("String")) {
+                        !fieldType.contains("short") && !fieldType.contains("Short") &&
+                        !fieldType.contains("int") && !fieldType.contains("Integer") &&
+                        !fieldType.contains("long") && !fieldType.contains("Long") &&
+                        !fieldType.contains("float") && !fieldType.contains("Float") &&
+                        !fieldType.contains("double") && !fieldType.contains("Double")) {
                     continue;   // 过滤掉不支持的类型
                 }
                 // 是否存需要映射到数据库
@@ -201,10 +205,26 @@ public abstract class SqlTemplate {
                 sql.append(", ");
             }
 
+            Field field = columnInfos.get(i).field;
+            TableColumn tableColumn = field.getAnnotation(TableColumn.class);
+
             try {
-                params[i] = columnInfos.get(i).field.get(object);   // 获取参数
-            } catch (IllegalAccessException e) {
-                params[i] = "";
+                Object obj = field.get(object); // 获取参数
+                if (obj != null) {
+                    String parStr = obj.toString();
+                    if (parStr.length() > tableColumn.maxLength()) {
+                        parStr = parStr.substring(0, tableColumn.maxLength());  // 超出限定长度时则裁剪掉超出部分
+                    }
+                    params[i] = parStr;
+                } else {
+                    params[i] = null;
+                }
+            } catch (Exception e) {
+                params[i] = null;
+            } finally {
+                if (params[i] == null) {   // 要是字段未赋值则获取默认值
+                    params[i] = tableColumn.defValue();
+                }
             }
         }
         sql.append(" ) VALUES ( ");
@@ -776,6 +796,32 @@ public abstract class SqlTemplate {
             if (cursor != null) {
                 cursor.close();
             }
+        }
+    }
+
+    /**
+     * 判断表是否存在
+     */
+    public static boolean existTable(Class<?> table) {
+        String sql = " SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = ? ";  // '" + getTableName(table) + "'
+        Cursor cursor = rawQuery(sql, new String[]{getTableName(table)});
+        if (cursor.moveToNext()) {
+            int count = cursor.getInt(0);
+            if (count > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 创建或者更新表
+     */
+    public static void updateOrCreateTable(Class<?> table, List<ColumnMapping> columnMappingList) {
+        if (existTable(table)) {
+            updateTable(table, columnMappingList);
+        } else {
+            createTable(table);
         }
     }
 

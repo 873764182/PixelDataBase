@@ -26,7 +26,9 @@ public @interface TableColumn {
     /* 最大长度 */
     int maxLength() default Integer.MAX_VALUE;
 
-    /* 是否启用 */
+    /* 是否启用 默认启用 */
     boolean enable() default true;
 
+    /* 默认值 即:插入数据库时对应的字段要是为空则插入该默认值到数据库字段 */
+    String defValue() default "";
 }
