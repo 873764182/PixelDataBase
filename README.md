@@ -96,7 +96,7 @@
         // 如果不需要保留原数据
         PixelTools.updateTable(UserTable.class, null);  // 映射参数传入 null, 仅仅更新表结构,不保留原数据,原来的数据会丢失.
 
-### 6. 如果需要获取数据库表中的自增长字段的值,可以使你的实体对象(如:UserTable对象)实现'OnDbIdCallback'接口.
+### 6. 如果需要获取数据库表中的自增长字段的值,可以使你的实体对象(如:UserTable对象)实现'OnDbIdCallback'接口.在执行查询的时候回自动返回数据库自增长值.
         public class UserTable implements OnDbIdCallback {
             @Override
             public void setId(Long _id) {
