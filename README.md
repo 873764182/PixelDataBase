@@ -12,14 +12,18 @@
 
 ### 2. 创建你的实体类
         支持Java的八大基础类型与String类型数据,不支持数组,不支持List,基本类型与String类型之外的其他类型将会实例化到数据库时失败.
-        为需要实例化到数据库的字段添加 "@TableColumn" 注解, 如下:
+        为需要实例化到数据库的字段添加 "@TableColumn" 注解, 要实例化到数据库表中的属性名不能是"_id",因为数据库中自己会建立一个列为"_id".
+        如下:
 
         /**
-         * 数据库实体 (一个普通的Java对象)
+         * 数据库实体 (就是一个普通的Java对象)
          */
         public class UserTable {
 
-            public Long $id;    // 没有 @TableColumn 注解在数据库表中不会创建该字段
+            public Long id;    // 没有 @TableColumn 注解在数据库表中不会创建该字段
+
+            // @TableColumn
+            // public Long _id;    // 错误,不能用该名字,数据库表中已经存在改列名,属于关键字,不能使用.
 
             @TableColumn
             public String name; // 在数据库表中会创建一个名为'name'的列
@@ -28,7 +32,7 @@
             public Integer age; // 在数据库表中会创建一个名为'age'的列
 
             // @TableColumn
-            // public List<String> list;   // 创建失败,不支持List或者数组等集合
+            // public List<String> list;   // 创建失败,不支持List或者数组等集合的属性
 
         }
 
@@ -92,11 +96,19 @@
         // 如果不需要保留原数据
         PixelTools.updateTable(UserTable.class, null);  // 映射参数传入 null, 仅仅更新表结构,不保留原数据,原来的数据会丢失.
 
-### 6. 如果需要更多操作,可以通过以下方法获取SQLiteDatabase对象.
+### 6. 如果需要获取数据库表中的自增长字段的值,可以使你的实体对象(如:UserTable对象)实现'OnDbIdCallback'接口.
+        public class UserTable implements OnDbIdCallback {
+            @Override
+            public void setId(Long _id) {
+                this.id = _id; // OnDbIdCallback接口方法,回传数据库自增长的ID的值.
+            }
+        }
+
+### 7. 如果需要更多操作,可以通过以下方法获取SQLiteDatabase对象.
         SQLiteDatabase database = SqlTemplate.getSQLiteDatabase();
 
-### 7. 目前已知的还需要优化的点
+### 8. 目前已知的还需要优化的点
         1. 封装对多表的联合查询操作,但是这样可能需要建立类似Hibernate那样的映射文件,支持库的复杂度会增加.
         
-## 联系我
+### 9. 联系我
         [873764182@qq.com](https://mail.qq.com/cgi-bin/frame_html)
