@@ -16,14 +16,18 @@
         @TableColumn
         public String name;
 
-        支持的类型: Integer, Long, Double, String. 其他类型将会实例化到数据库时失败.
+        支持Java的八大基础类型与String类型数据,不支持数组,不支持List,基本类型与String类型之外的其他类型将会实例化到数据库时失败.
 
 ### 3. 初始化
 #### 最好在Application对象的onCreate中初始化,传入数据库 名称 与 需要生成表的 Java实体 对象列表(第二步建立的实体对象).
+
         SqlTemplate.initDataBase(getApplicationContext(), "pdb.db", 1, UserTable.class, MsgTable.class);
+
 #### 如果需要监听数据库版本变更,初始化时可以传入一个监听器.
-        // 需要生成数据表的对象 注意: 数据名是对象的全路径名,不能随意修改对象包名与对象名.
+
+        // 需要生成数据表的对象 注意: 数据名是对象的全路径名,初始化后不能随意修改对象包名与对象名,否则需要增加数据库版本号重新初始化.
         Class<?>[] tables = new Class[]{UserTable.class, MsgTable.class, TestTable.class};
+
         // 初始化数据库与创建数据库表 version修改后,onUpgrade方法会被回调.
         SqlTemplate.initDataBase(this, "pdb.db", 4, tables, new OnDbUpdateCallback() {
             @Override
