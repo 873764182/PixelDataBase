@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -32,9 +33,17 @@ public class MainActivity extends Activity {
         mTextVersion.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mTextVersion.setText("数据库版本号: " + SqlTemplate.getSQLiteDatabase().getVersion());
+                mTextVersion.setText("数据库版本号: " + SqlTemplate.getDbVersion());
             }
         }, 1000);
+
+        mTextVersion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                long count = SqlTemplate.getTableRowCount(UserTable.class);
+                Toast.makeText(MainActivity.this, "表中有 " + count + " 行", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public void onViewClick(View view) {

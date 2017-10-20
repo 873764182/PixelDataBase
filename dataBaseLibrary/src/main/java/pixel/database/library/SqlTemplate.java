@@ -677,6 +677,58 @@ public abstract class SqlTemplate {
         return objects;
     }
 
+    /**
+     * 获取数据库表有多少行数据
+     *
+     * @param table 表对象
+     * @return 行数
+     */
+    public static long getTableRowCount(Class<?> table) {
+        return getTableRowCount(table, null, null);
+    }
+
+    /**
+     * 获取对应的表中有多少行数据 带条件的查询
+     *
+     * @param table  表对象
+     * @param column 列名
+     * @param value  条件
+     * @return 行数
+     */
+    public static long getTableRowCount(Class<?> table, String column, Object value) {
+        long count = 0L;
+        Cursor cursor = null;
+        try {
+            getSQLiteDatabase().beginTransaction();
+
+            String[] parameter = null;
+            StringBuilder sql = new StringBuilder("SELECT count(*) FROM ");
+            sql.append(getTableName(table));
+            if (column != null && value != null) {
+                sql.append(" WHERE ( ");
+                sql.append(column).append(" = ").append(" ? ");
+                sql.append(" ) ");
+
+                parameter = new String[]{value.toString()};
+            }
+            String sqlStr = sql.toString().replace("  ", " ");
+            cursor = getSQLiteDatabase().rawQuery(sqlStr, parameter);
+            if (cursor != null && cursor.moveToNext()) {
+                count = cursor.getLong(0);
+            }
+
+            getSQLiteDatabase().setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            getSQLiteDatabase().endTransaction();
+        }
+        return count;
+    }
+
     // ============================================================================================= 华丽的分割线
 
     /**
@@ -932,4 +984,12 @@ public abstract class SqlTemplate {
         }
     }
 
+    /**
+     * 获取数据库版本号
+     *
+     * @return 版本号
+     */
+    public static int getDbVersion() {
+        return getSQLiteDatabase().getVersion();
+    }
 }
