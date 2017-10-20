@@ -16,6 +16,7 @@ public class UserTable implements OnDbIdCallback {
     @TableColumn
     public String name;
 
+//    @TableColumn
 //    public String username;
 
     @TableColumn
@@ -37,7 +38,7 @@ public class UserTable implements OnDbIdCallback {
         return "UserTable{" +
                 "_id=" + $id +
                 ", name='" + name + '\'' +
-//                ", name='" + username + '\'' +
+//                ", username='" + username + '\'' +
                 ", age=" + age +
                 ", list=" + list +
                 '}';

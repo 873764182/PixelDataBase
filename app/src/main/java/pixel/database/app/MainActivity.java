@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -15,6 +16,8 @@ public class MainActivity extends Activity {
     private EditText mEditTextDeleteId;
     private EditText mEditTextQueryId;
 
+    private TextView mTextVersion;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,6 +26,15 @@ public class MainActivity extends Activity {
         mEditTextUpdateId = (EditText) findViewById(R.id.editTextUpdateId);
         mEditTextDeleteId = (EditText) findViewById(R.id.editTextDeleteId);
         mEditTextQueryId = (EditText) findViewById(R.id.editTextQueryId);
+
+        mTextVersion = (TextView) findViewById(R.id.textVersion);
+
+        mTextVersion.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mTextVersion.setText("数据库版本号: " + SqlTemplate.getSQLiteDatabase().getVersion());
+            }
+        }, 1000);
     }
 
     public void onViewClick(View view) {

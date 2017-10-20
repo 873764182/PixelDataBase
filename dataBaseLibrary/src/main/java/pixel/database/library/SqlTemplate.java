@@ -21,9 +21,9 @@ import java.util.Map;
 public abstract class SqlTemplate {
 
     /* 数据库对象 */
-    private volatile static SQLiteDatabase mSqLiteDatabase = null;
+    private static SQLiteDatabase mSqLiteDatabase = null;
     /* 缓存变字典信息 */
-    private volatile static Map<String, List<ColumnInfo>> mColumnInfoMap = new Hashtable<>();
+    private static Map<String, List<ColumnInfo>> mColumnInfoMap = new Hashtable<>();
 
     /**
      * 初始化数据库且根据实体创建数据库表
@@ -34,7 +34,7 @@ public abstract class SqlTemplate {
      * @param tables  表实体
      */
     public static void initDataBase(Context context, String dbName, int version, Class<?>... tables) {
-        initDataBase(context, dbName, version, null, tables);
+        initDataBase(context, dbName, version, tables, null);
     }
 
     /**
@@ -44,8 +44,19 @@ public abstract class SqlTemplate {
      * @param onDbUpdateCallback 数据库版本更新监听
      * @param tables             表实体
      */
-    public synchronized static void initDataBase(Context context, String dbName, int version, OnDbUpdateCallback onDbUpdateCallback, Class<?>... tables) {
-        DataBaseHelper dataBaseHelper = new DataBaseHelper(context, dbName, version, onDbUpdateCallback, tables);
+    public static void initDataBase(Context context, String dbName, int version, OnDbUpdateCallback onDbUpdateCallback, Class<?>... tables) {
+        initDataBase(context, dbName, version, tables, onDbUpdateCallback);
+    }
+
+    /**
+     * @param context            上下文
+     * @param dbName             数据库名称
+     * @param version            数据库版本
+     * @param tables             表实体
+     * @param onDbUpdateCallback 数据库版本更新监听
+     */
+    public synchronized static void initDataBase(Context context, String dbName, int version, Class<?>[] tables, OnDbUpdateCallback onDbUpdateCallback) {
+        DataBaseHelper dataBaseHelper = new DataBaseHelper(context, dbName, version, tables, onDbUpdateCallback);
         if (mSqLiteDatabase == null) {
             mSqLiteDatabase = dataBaseHelper.getWritableDatabase();
         }
@@ -60,6 +71,11 @@ public abstract class SqlTemplate {
         return SqlTemplate.mSqLiteDatabase;
     }
 
+    /**
+     * 设置数据库实例
+     *
+     * @param mSqLiteDatabase 数据库对象
+     */
     public synchronized static void setSqLiteDatabase(SQLiteDatabase mSqLiteDatabase) {
         SqlTemplate.mSqLiteDatabase = mSqLiteDatabase;
     }
@@ -92,9 +108,9 @@ public abstract class SqlTemplate {
             for (Field field : fields) {
                 field.setAccessible(true); // 不过滤私有的属性
                 String fieldType = field.getType().getName();
-                // boolean, char, byte、short、int、long, float、double
+                // 支持Java的8大基本类型存储 boolean, char, byte、short、int、long, float、double
                 if (!fieldType.contains("boolean") && !fieldType.contains("Boolean") &&
-                        !fieldType.contains("char") && !fieldType.contains("String") &&
+                        !fieldType.contains("char") && !fieldType.contains("String") && // 字符串也支持
                         !fieldType.contains("byte") && !fieldType.contains("Byte") &&
                         !fieldType.contains("short") && !fieldType.contains("Short") &&
                         !fieldType.contains("int") && !fieldType.contains("Integer") &&
@@ -102,6 +118,10 @@ public abstract class SqlTemplate {
                         !fieldType.contains("float") && !fieldType.contains("Float") &&
                         !fieldType.contains("double") && !fieldType.contains("Double")) {
                     continue;   // 过滤掉不支持的类型
+                }
+                // TODO 暂时不支持数组类型 如果有数组请暂时转为String存储
+                if (fieldType.contains("[") || fieldType.contains("]")) {
+                    continue;
                 }
                 // 是否存需要映射到数据库
                 if (field.isAnnotationPresent(TableColumn.class)) {
@@ -630,7 +650,17 @@ public abstract class SqlTemplate {
                         info.field.set(object, cursor.getDouble(cursor.getColumnIndex(info.columnName)));
                     } else if (info.typeString.contains("byte") || info.typeString.contains("Byte")) {
                         info.field.set(object, cursor.getBlob(cursor.getColumnIndex(info.columnName)));
-                    } else {    // 默认 String 类型
+                    } else if (info.typeString.contains("float") || info.typeString.contains("Float")) {
+                        info.field.set(object, cursor.getFloat(cursor.getColumnIndex(info.columnName)));
+                    } else if (info.typeString.contains("short") || info.typeString.contains("Short")) {
+                        info.field.set(object, cursor.getShort(cursor.getColumnIndex(info.columnName)));
+                    } else if (info.typeString.contains("boolean") || info.typeString.contains("Boolean")) {
+                        try {
+                            info.field.set(object, Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(info.columnName))));
+                        } catch (Exception e) {
+                            Log.e("SqlTemplate", "数据库存储'boolean'值得字段不正确,结果应该只为: true, false", e);
+                        }
+                    } else {    // 默认 char, String 类型
                         info.field.set(object, cursor.getString(cursor.getColumnIndex(info.columnName)));
                     }
                     if (object instanceof OnDbIdCallback) {
@@ -745,26 +775,29 @@ public abstract class SqlTemplate {
         Cursor cursor = null;
         try {
             getSQLiteDatabase().beginTransaction();
-
+            // 获取对应表名
             String tableName = getTableName(table);
+            // 获取临时表名
             String tableNameTemp = tableName + "_temp";
+            // 将即将修改的表修改名称
             tableRename(tableName, tableNameTemp);
+            // 创建新表
             createTable(table);
-
+            // 判断是否需要还原旧的数据库到新表中
             if (columnMappingList == null || columnMappingList.size() <= 0) {
                 deleteTable(tableNameTemp);
                 getSQLiteDatabase().setTransactionSuccessful();
                 return;
             }
-
+            // 开始数据还原操作
             cursor = getSQLiteDatabase().rawQuery("SELECT * FROM " + tableNameTemp, null);
             while (cursor.moveToNext()) {
-                Object[] params = new Object[columnMappingList.size() + 1];
+                Object[] params = new Object[columnMappingList.size() + 1]; // 加一,是因为数据库的_id字段是系统自动生成的,非用户对象指定生成.
                 params[0] = cursor.getLong(cursor.getColumnIndex("_id"));
                 for (int i = 0; i < columnMappingList.size(); i++) {
                     params[i + 1] = cursor.getString(cursor.getColumnIndex(columnMappingList.get(i).oldColumn));
                 }
-
+                // 拼接字段
                 StringBuilder insertSql = new StringBuilder("INSERT INTO ");
                 insertSql.append(tableName);
                 insertSql.append(" ( _id, ");
@@ -774,7 +807,7 @@ public abstract class SqlTemplate {
                         insertSql.append(", ");
                     }
                 }
-
+                // 拼接参数
                 insertSql.append(" ) VALUES ( ?, ");
                 for (int i = 0; i < columnMappingList.size(); i++) {
                     insertSql.append(" ? ");
@@ -783,9 +816,10 @@ public abstract class SqlTemplate {
                     }
                 }
                 insertSql.append(" ) ");
+                // 插入数据到新表
                 getSQLiteDatabase().execSQL(insertSql.toString(), params);
             }
-
+            // 删除旧的表
             deleteTable(tableNameTemp);
 
             getSQLiteDatabase().setTransactionSuccessful();
