@@ -11,12 +11,26 @@
         pixel-data-base.jar (在项目根目录可以找到)
 
 ### 2. 创建你的实体类
+        支持Java的八大基础类型与String类型数据,不支持数组,不支持List,基本类型与String类型之外的其他类型将会实例化到数据库时失败.
         为需要实例化到数据库的字段添加 "@TableColumn" 注解, 如下:
 
-        @TableColumn
-        public String name;
+        /**
+         * 数据库实体 (一个普通的Java对象)
+         */
+        public class UserTable {
 
-        支持Java的八大基础类型与String类型数据,不支持数组,不支持List,基本类型与String类型之外的其他类型将会实例化到数据库时失败.
+            public Long $id;    // 没有 @TableColumn 注解在数据库表中不会创建该字段
+
+            @TableColumn
+            public String name; // 在数据库表中会创建一个名为'name'的列
+
+            @TableColumn
+            public Integer age; // 在数据库表中会创建一个名为'age'的列
+
+            // @TableColumn
+            // public List<String> list;   // 创建失败,不支持List或者数组等集合
+
+        }
 
 ### 3. 初始化
 #### 最好在Application对象的onCreate中初始化,传入数据库 名称 与 需要生成表的 Java实体 对象列表(第二步建立的实体对象).
