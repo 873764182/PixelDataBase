@@ -33,6 +33,11 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         // 回传更新数据库更新事件
         if (onDbUpdateCallback != null) {
             onDbUpdateCallback.onUpgrade(db, oldVersion, newVersion, tables);
+        } else {
+            // 删除目前所有的表
+            SqlTemplate.deleteTable(tables);
+            // 重新生成所有数据库表
+            SqlTemplate.createTable(tables);
         }
     }
 }
