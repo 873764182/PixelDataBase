@@ -1,6 +1,7 @@
 package pixel.database.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +20,9 @@ public class MainActivity extends Activity {
 
     private TextView mTextVersion;
 
+    private Button mBtnBaseInsert;
+    private Button mBtnBaseQuery;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +33,9 @@ public class MainActivity extends Activity {
         mEditTextQueryId = (EditText) findViewById(R.id.editTextQueryId);
 
         mTextVersion = (TextView) findViewById(R.id.textVersion);
+
+        mBtnBaseInsert = (Button) findViewById(R.id.btnBaseInsert);
+        mBtnBaseQuery = (Button) findViewById(R.id.btnBaseQuery);
 
         mTextVersion.postDelayed(new Runnable() {
             @Override
@@ -42,6 +49,21 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 long count = SqlTemplate.getTableRowCount(UserTable.class);
                 Toast.makeText(MainActivity.this, "表中有 " + count + " 行", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        mBtnBaseInsert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SqlTemplate.insert(
+                        new BaseTable(true, 'c', (byte) 1, Short.parseShort("1"), 2, 3L, 4F, 5D, "string"));   // boolean , char , byte , short , int , long , float , double , String
+            }
+        });
+        mBtnBaseQuery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<BaseTable> baseTableList = SqlTemplate.query(BaseTable.class);
+                new AlertDialog.Builder(MainActivity.this).setMessage(baseTableList.toString()).create().show();
             }
         });
     }

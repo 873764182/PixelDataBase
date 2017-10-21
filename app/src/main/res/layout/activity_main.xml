@@ -96,6 +96,20 @@
             android:layout_height="wrap_content"
             android:onClick="onViewClick"
             android:text="更新表结构 不保留数据" />
+
+        <Button
+            android:id="@+id/btnBaseInsert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Base_Table 插入测试" />
+
+        <Button
+            android:id="@+id/btnBaseQuery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Base_Table 读取测试" />
+
     </LinearLayout>
 
 </ScrollView>

@@ -649,7 +649,10 @@ public abstract class SqlTemplate {
                     } else if (info.typeString.contains("double") || info.typeString.contains("Double")) {
                         info.field.set(object, cursor.getDouble(cursor.getColumnIndex(info.columnName)));
                     } else if (info.typeString.contains("byte") || info.typeString.contains("Byte")) {
-                        info.field.set(object, cursor.getBlob(cursor.getColumnIndex(info.columnName)));
+                        byte[] byteValue = cursor.getBlob(cursor.getColumnIndex(info.columnName));
+                        if (byteValue != null && byteValue.length > 0) {
+                            info.field.set(object, byteValue[0]);   // TODO 需要优化 支持byte[]
+                        }
                     } else if (info.typeString.contains("float") || info.typeString.contains("Float")) {
                         info.field.set(object, cursor.getFloat(cursor.getColumnIndex(info.columnName)));
                     } else if (info.typeString.contains("short") || info.typeString.contains("Short")) {
@@ -660,12 +663,18 @@ public abstract class SqlTemplate {
                         } catch (Exception e) {
                             Log.e("SqlTemplate", "数据库存储'boolean'值得字段不正确,结果应该只为: true, false", e);
                         }
-                    } else {    // 默认 char, String 类型
+                    } else if (info.typeString.contains("char")) {
+                        String stringValue = cursor.getString(cursor.getColumnIndex(info.columnName));
+                        if (stringValue != null && stringValue.length() > 0) {
+                            info.field.set(object, stringValue.charAt(0));  // char[] strChar = stringValue.toCharArray();
+                        }
+                    } else {    // 默认String类型
                         info.field.set(object, cursor.getString(cursor.getColumnIndex(info.columnName)));
                     }
-                    if (object instanceof OnDbIdCallback) {
-                        ((OnDbIdCallback) object).setId(cursor.getLong(cursor.getColumnIndex("_id")));
-                    }
+                }
+                // 获取数据库自增长字段
+                if (object instanceof OnDbIdCallback) {
+                    ((OnDbIdCallback) object).setId(cursor.getLong(cursor.getColumnIndex("_id")));
                 }
                 objects.add((T) object);
             }
